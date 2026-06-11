@@ -99,7 +99,7 @@ nav {
 nav button {
   font-family: 'Fredoka', sans-serif; font-weight: 500;
   border: 0; background: transparent; color: var(--muted);
-  width: 88px; padding: 9px 0; border-radius: 19px; font-size: 12px; cursor: pointer;
+  width: 80px; padding: 9px 0; border-radius: 19px; font-size: 12px; cursor: pointer;
   display: flex; flex-direction: column; align-items: center; gap: 2px;
   transition: all .25s ease;
 }
@@ -204,6 +204,28 @@ input[type=range]::-webkit-slider-thumb {
 }
 #rhint { color: var(--muted); font-size: 13px; padding-bottom: max(26px, env(safe-area-inset-bottom)); text-align: center; }
 
+/* ---------- ERR õhtujutt ---------- */
+.errmonth { font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 14px;
+  color: var(--lavender); margin: 18px 4px 8px; text-transform: capitalize; }
+.ep { display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer; }
+.ep .epd { color: var(--muted); font-size: 12px; min-width: 34px; }
+.ep .ept { flex: 1; font-size: 14.5px; font-weight: 500; }
+.ep .epp { font-size: 16px; color: var(--muted); }
+.ep.playing { border-color: rgba(255, 217, 138, .5); box-shadow: var(--glow); }
+.ep.playing .epp { color: var(--moon); }
+#errnow { font-family: 'Fredoka', sans-serif; font-size: 15px; margin-bottom: 10px; }
+.errctl { display: flex; align-items: center; gap: 12px; }
+.errctl button { width: 44px; height: 44px; border-radius: 50%; border: 0; font-size: 17px;
+  background: linear-gradient(160deg, #ffe3a6, var(--moon-deep)); color: var(--ink);
+  cursor: pointer; box-shadow: var(--glow); flex-shrink: 0; }
+.errctl span { color: var(--muted); font-size: 12px; min-width: 76px; text-align: right; }
+.errmsg { text-align: center; color: var(--muted); padding: 30px 10px; font-size: 14px; }
+#errmore { display: block; width: 100%; margin-top: 14px; padding: 13px; border-radius: 16px;
+  font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 15px;
+  color: var(--muted); background: transparent; border: 1px solid var(--card-line); cursor: pointer; }
+.errsrc { text-align: center; color: var(--muted); font-size: 12px; margin-top: 16px; }
+.errsrc a { color: var(--lavender); }
+
 /* ---------- routine ---------- */
 #moonmeter { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
 #meterfill-wrap { flex: 1; height: 14px; background: var(--ink-3); border-radius: 7px; overflow: hidden; }
@@ -298,6 +320,22 @@ input[type=range]::-webkit-slider-thumb {
       <div id="storylist"></div>
     </section>
 
+    <!-- ERR ÕHTUJUTT -->
+    <section class="screen" id="s-err">
+      <h2>Õhtujutt <small>Vikerraadio unejutud otse ERR-ist · vajab internetti</small></h2>
+      <div class="card" id="errplayer" style="display:none">
+        <div id="errnow"></div>
+        <div class="errctl">
+          <button id="errpp">⏸</button>
+          <input type="range" id="errseek" min="0" max="1000" value="0">
+          <span id="errtime">0:00</span>
+        </div>
+      </div>
+      <div id="errlist"><div class="errmsg">Laen jutte…</div></div>
+      <button id="errmore" style="display:none">Lae varasemaid jutte</button>
+      <p class="errsrc">Allikas: <a href="https://lasteekraan.err.ee" target="_blank" rel="noopener">ERR Lasteekraan</a> · Vikerraadio</p>
+    </section>
+
     <!-- ROUTINE -->
     <section class="screen" id="s-routine">
       <h2>Unesammud <small>tee kõik ära, et kuu täis saaks</small></h2>
@@ -315,6 +353,7 @@ input[type=range]::-webkit-slider-thumb {
   <nav>
     <button class="on" data-scr="sounds"><span class="ico">🌧️</span>Helid</button>
     <button data-scr="stories"><span class="ico">📖</span>Jutud</button>
+    <button data-scr="err"><span class="ico">📻</span>Õhtujutt</button>
     <button data-scr="routine"><span class="ico">⭐</span>Sammud</button>
   </nav>
 </div>
@@ -367,6 +406,7 @@ input[type=range]::-webkit-slider-thumb {
 document.querySelectorAll('nav button').forEach(b => b.addEventListener('click', () => {
   document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x === b));
   document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === 's-' + b.dataset.scr));
+  if (b.dataset.scr === 'err') errInit();
 }));
 
 /* ================= sound engine (Web Audio, fully synthesized) ================= */
@@ -849,6 +889,117 @@ document.getElementById('rpage').addEventListener('click', () => {
   else { reader.classList.remove('open'); quietTTS(); }
 });
 document.getElementById('rclose').addEventListener('click', () => { reader.classList.remove('open'); quietTTS(); });
+
+/* ================= ERR õhtujutt (lasteekraan.err.ee, CORS-open API + CDN) ================= */
+const ERR_API = 'https://services.err.ee/api/v2/vodContent/getContentPageData?contentId=';
+const ERR_SEED = 1610028683; // any Õhtujutt episode id — its page data carries the series archive
+const errSt = { months: [], loaded: 0, inited: false, audio: null, playingId: null };
+async function errFetch(id) {
+  const r = await fetch(ERR_API + id);
+  if (!r.ok) throw new Error('http ' + r.status);
+  return (await r.json()).data;
+}
+function errMonthsFrom(data) {
+  const out = [];
+  for (const y of data.seasonList.items)
+    for (const m of (y.items || []))
+      out.push({ label: `${m.name} ${y.name}`, first: m.firstContentId, contents: m.contents || null });
+  return out;
+}
+function errAddMonth(m) {
+  const list = document.getElementById('errlist');
+  const h = document.createElement('div');
+  h.className = 'errmonth'; h.textContent = m.label;
+  list.appendChild(h);
+  for (const ep of m.contents) {
+    const d = new Date(ep.publicStart * 1000);
+    const row = document.createElement('div');
+    row.className = 'card ep';
+    row.innerHTML = `<span class="epd">${d.getDate()}.${String(d.getMonth() + 1).padStart(2, '0')}</span>` +
+      `<span class="ept">${ep.heading.replace(/^Õhtujutt( lastele)?[.,]?\s*/i, '')}</span><span class="epp">▶</span>`;
+    row.addEventListener('click', () => errPlay(ep, row));
+    list.appendChild(row);
+  }
+}
+async function errInit() {
+  if (errSt.inited) return;
+  errSt.inited = true;
+  try {
+    const data = await errFetch(ERR_SEED);
+    errSt.months = errMonthsFrom(data);
+    document.getElementById('errlist').innerHTML = '';
+    await errLoadNextMonth();
+    document.getElementById('errmore').style.display = 'block';
+  } catch (e) {
+    errSt.inited = false; // allow retry on next tab visit
+    document.getElementById('errlist').innerHTML =
+      '<div class="errmsg">Juttude laadimine ebaõnnestus 😴<br>Kontrolli internetiühendust ja proovi uuesti.</div>';
+  }
+}
+async function errLoadNextMonth() {
+  const m = errSt.months[errSt.loaded];
+  if (!m) { document.getElementById('errmore').style.display = 'none'; return; }
+  if (!m.contents) {
+    const data = await errFetch(m.first);
+    const fetched = errMonthsFrom(data).find(x => x.first === m.first);
+    m.contents = (fetched && fetched.contents) || [];
+  }
+  errAddMonth(m);
+  errSt.loaded++;
+}
+document.getElementById('errmore').addEventListener('click', function () {
+  this.textContent = 'Laen…';
+  errLoadNextMonth().catch(() => {}).finally(() => { this.textContent = 'Lae varasemaid jutte'; });
+});
+function errFmt(s) {
+  if (!isFinite(s)) return '0:00';
+  return Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+}
+function errUpdateUI() {
+  const a = errSt.audio;
+  document.getElementById('errpp').textContent = (!a || a.paused) ? '▶' : '⏸';
+  document.querySelectorAll('.ep.playing .epp').forEach(e => e.textContent = (!a || a.paused) ? '▶' : '⏸');
+  if (!a) return;
+  document.getElementById('errtime').textContent = errFmt(a.currentTime) + ' / ' + errFmt(a.duration);
+  if (a.duration) document.getElementById('errseek').value = Math.round(a.currentTime / a.duration * 1000);
+}
+async function errPlay(ep, row) {
+  if (errSt.playingId === ep.id && errSt.audio) {
+    errSt.audio.paused ? errSt.audio.play() : errSt.audio.pause();
+    errUpdateUI();
+    return;
+  }
+  if (errSt.audio) { errSt.audio.pause(); errSt.audio = null; }
+  errSt.playingId = ep.id;
+  document.querySelectorAll('.ep.playing').forEach(r => { r.classList.remove('playing'); r.querySelector('.epp').textContent = '▶'; });
+  row.classList.add('playing');
+  row.querySelector('.epp').textContent = '…';
+  try {
+    const data = await errFetch(ep.id);
+    const src = data.mainContent.medias[0].src.file;
+    const a = new Audio(src.startsWith('//') ? 'https:' + src : src);
+    errSt.audio = a;
+    Snd.stop(); quietTTS(); // one storyteller at a time
+    document.getElementById('errplayer').style.display = 'block';
+    document.getElementById('errnow').textContent = ep.heading;
+    a.ontimeupdate = errUpdateUI;
+    a.onended = errUpdateUI;
+    a.onplay = errUpdateUI;
+    a.onpause = errUpdateUI;
+    await a.play();
+  } catch (e) {
+    row.querySelector('.epp').textContent = '⚠️';
+    row.classList.remove('playing');
+  }
+}
+document.getElementById('errpp').addEventListener('click', () => {
+  const a = errSt.audio;
+  if (a) { a.paused ? a.play() : a.pause(); errUpdateUI(); }
+});
+document.getElementById('errseek').addEventListener('input', e => {
+  const a = errSt.audio;
+  if (a && a.duration) a.currentTime = e.target.value / 1000 * a.duration;
+});
 
 /* ================= routine ================= */
 const TASKS = [
