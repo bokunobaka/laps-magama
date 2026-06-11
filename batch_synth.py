@@ -14,6 +14,10 @@ import types
 
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
 
+# the script lives in the app repo but imports tts_worker/TransformerTTS from
+# the worker checkout it is run from — python adds the script dir, not the cwd
+sys.path.insert(0, os.getcwd())
+
 APP = pathlib.Path(__file__).resolve().parent
 OUT = APP / "audio"
 OUT.mkdir(exist_ok=True)

@@ -8,14 +8,13 @@ One self-contained `index.html` — no build step, no framework, no server-side 
 - **Öised helid** — calming sounds synthesized live with the Web Audio API
   (no audio files): rain, ocean, wind, and a music-box Brahms lullaby.
   Volume slider and a sleep timer (15/30/45 min) that fades out over the last minute.
-- **Unejutud** — seven short bedtime stories with big calm text that dims page by
-  page. Three originals plus softened retellings of Punamütsike, Kolm põrsakest,
-  Lumivalgeke, and Tuhkatriinu. Optional narration (🔊 Loe ette) plays
-  pre-generated neural TTS audio at 0.8× speed with pitch preserved.
-- **Hinga koos Nunnuga** — a breathing buddy (CSS-drawn moon bunny): 4 s in,
-  1.5 s hold, 6 s out; earns a star per breath, winds down after 8.
+- **Unejutud** — seven bedtime stories (12–13 pages each) with big calm text that
+  dims page by page. Three originals plus softened retellings of Punamütsike,
+  Kolm põrsakest, Lumivalgeke, and Tuhkatriinu. Optional narration (🔊 Loe ette)
+  plays pre-generated neural TTS audio at 0.8× speed with pitch preserved.
 - **Unesammud** — an 8-step bedtime routine checklist with flying-star rewards
-  and a moon meter; state is per-day in localStorage, full moon celebration at 100%.
+  and a moon meter; state is per-day in localStorage, full moon celebration at
+  100%, reset button to start the steps over.
 
 ## Running it
 
@@ -127,7 +126,6 @@ Everything lives in `index.html`:
 - `TASKS` — the routine checklist `[emoji, label]` pairs.
 - `Snd` — the sound engine; each sound is a small Web Audio graph
   (`startRain`, `startOcean`, `startWind`, `startLullaby`).
-- `PHASES` — breathing rhythm `[cssClass, word, subtitle, milliseconds]`.
 
 ## Deployment
 

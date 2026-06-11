@@ -196,53 +196,6 @@ input[type=range]::-webkit-slider-thumb {
 }
 #rhint { color: var(--muted); font-size: 13px; padding-bottom: max(26px, env(safe-area-inset-bottom)); text-align: center; }
 
-/* ---------- breathe ---------- */
-#breathe-wrap { display: flex; flex-direction: column; align-items: center; padding-top: 8px; }
-#buddy {
-  position: relative; width: 190px; height: 190px; margin-top: 46px;
-  transition: transform 4s cubic-bezier(.45,0,.55,1);
-  transform: scale(.82);
-}
-#buddy .body {
-  position: absolute; inset: 0; border-radius: 50%;
-  background: radial-gradient(circle at 38% 32%, #fff6e0, #ffe2a4 50%, var(--moon-deep));
-  box-shadow: 0 0 60px 12px rgba(255, 217, 138, .3), inset -14px -16px 0 rgba(214, 158, 73, .28);
-}
-.ear { position: absolute; width: 38px; height: 84px; border-radius: 50% 50% 45% 45%;
-  background: linear-gradient(180deg, #ffedc4, var(--moon-deep)); top: -56px; z-index: -1; }
-.ear::after { content: ''; position: absolute; inset: 14px 9px 16px;
-  border-radius: inherit; background: var(--rose); opacity: .65; }
-.ear.l { left: 34px; transform: rotate(-12deg); }
-.ear.r { right: 34px; transform: rotate(12deg); }
-.eye { position: absolute; top: 78px; width: 30px; height: 15px;
-  border-bottom: 4.5px solid #6b4a18; border-radius: 0 0 30px 30px; }
-.eye.l { left: 42px; } .eye.r { right: 42px; }
-.cheek { position: absolute; top: 104px; width: 22px; height: 12px; border-radius: 50%;
-  background: var(--rose); opacity: .55; }
-.cheek.l { left: 30px; } .cheek.r { right: 30px; }
-.mouth { position: absolute; top: 104px; left: 50%; transform: translateX(-50%);
-  width: 16px; height: 9px; border-bottom: 4px solid #6b4a18; border-radius: 0 0 16px 16px; }
-#buddy .ring {
-  position: absolute; inset: -26px; border-radius: 50%;
-  border: 2px dashed rgba(170, 180, 255, .35);
-  animation: spin 40s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-#buddy.in { transform: scale(1.16); }
-#buddy.hold { transform: scale(1.16); transition-duration: 1.5s; }
-#buddy.out { transform: scale(.82); transition-duration: 6s; }
-#bword { font-family: 'Fredoka', sans-serif; font-size: 26px; font-weight: 500;
-  margin-top: 52px; min-height: 36px; color: var(--moon); transition: opacity .4s; }
-#bsub { color: var(--muted); font-size: 14px; margin-top: 6px; min-height: 20px; }
-#bstars { margin-top: 18px; font-size: 22px; letter-spacing: 6px; min-height: 30px; }
-#bbtn {
-  margin-top: 26px; font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 17px;
-  color: var(--ink); background: linear-gradient(160deg, #ffe3a6, var(--moon-deep));
-  border: 0; border-radius: 20px; padding: 15px 44px; cursor: pointer; box-shadow: var(--glow);
-  transition: transform .2s;
-}
-#bbtn:active { transform: scale(.95); }
-
 /* ---------- routine ---------- */
 #moonmeter { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
 #meterfill-wrap { flex: 1; height: 14px; background: var(--ink-3); border-radius: 7px; overflow: hidden; }
@@ -266,6 +219,13 @@ input[type=range]::-webkit-slider-thumb {
 .task.done .tl { text-decoration: line-through; text-decoration-color: var(--moon-deep); }
 .task.done .te { transform: scale(1.18) rotate(-8deg); }
 .task.done .tc { background: var(--moon); border-color: var(--moon); color: var(--ink); }
+#resettasks {
+  display: block; width: 100%; margin-top: 14px; padding: 13px; border-radius: 16px;
+  font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 15px;
+  color: var(--muted); background: transparent; border: 1px solid var(--card-line);
+  cursor: pointer; transition: all .25s;
+}
+#resettasks:active { transform: scale(.98); color: var(--text); }
 #celebrate {
   position: fixed; inset: 0; z-index: 30; display: none; flex-direction: column;
   align-items: center; justify-content: center; text-align: center; padding: 30px;
@@ -278,6 +238,7 @@ input[type=range]::-webkit-slider-thumb {
 #celebrate button { margin-top: 32px; font-family: 'Fredoka'; font-size: 16px; color: var(--text);
   background: var(--card); border: 1px solid var(--card-line); border-radius: 18px;
   padding: 13px 36px; cursor: pointer; }
+#celebrate #creset { margin-top: 12px; color: var(--muted); border-color: transparent; }
 .flystar { position: fixed; z-index: 40; font-size: 22px; pointer-events: none;
   animation: fly 1s ease-out forwards; }
 @keyframes fly {
@@ -325,25 +286,6 @@ input[type=range]::-webkit-slider-thumb {
       <div id="storylist"></div>
     </section>
 
-    <!-- BREATHE -->
-    <section class="screen" id="s-breathe">
-      <h2>Hinga koos Nunnuga <small>kuujänku hingab aeglaselt — tee järele</small></h2>
-      <div id="breathe-wrap">
-        <div id="buddy">
-          <div class="ring"></div>
-          <div class="ear l"></div><div class="ear r"></div>
-          <div class="body"></div>
-          <div class="eye l"></div><div class="eye r"></div>
-          <div class="cheek l"></div><div class="cheek r"></div>
-          <div class="mouth"></div>
-        </div>
-        <div id="bword">&nbsp;</div>
-        <div id="bsub">&nbsp;</div>
-        <div id="bstars"></div>
-        <button id="bbtn">Alusta hingamist ✨</button>
-      </div>
-    </section>
-
     <!-- ROUTINE -->
     <section class="screen" id="s-routine">
       <h2>Unesammud <small>tee kõik ära, et kuu täis saaks</small></h2>
@@ -354,13 +296,13 @@ input[type=range]::-webkit-slider-thumb {
         <span style="font-size:22px">🌕</span>
       </div>
       <div id="tasklist"></div>
+      <button id="resettasks">↺ Alusta sammudega uuesti</button>
     </section>
   </main>
 
   <nav>
     <button class="on" data-scr="sounds"><span class="ico">🌧️</span>Helid</button>
     <button data-scr="stories"><span class="ico">📖</span>Jutud</button>
-    <button data-scr="breathe"><span class="ico">🐰</span>Hinga</button>
     <button data-scr="routine"><span class="ico">⭐</span>Sammud</button>
   </nav>
 </div>
@@ -378,6 +320,7 @@ input[type=range]::-webkit-slider-thumb {
   <h2>Kõik tehtud, supertäht!</h2>
   <p>Iga unesamm on tehtud.<br>Kuu on täis ja sinu üle uhke.<br><b>Head ööd, maga magusasti! 💤</b></p>
   <button id="cclose">Sulge</button>
+  <button id="creset">↺ Alusta uuesti</button>
 </div>
 
 <script>
@@ -584,74 +527,105 @@ document.getElementById('stopsnd').addEventListener('click', () => Snd.stop());
 /* ================= stories ================= */
 const STORIES = [
   { title: 'Unine väike täht', sub: 'täht õpib puhkama', cover: '⭐', pages: [
-    ['⭐', 'Kõrgel sametisel taeval elas väike täht nimega Tiku.'],
-    ['✨', 'Terve öö Tiku säras ja keerutas ja kihistas naerda.'],
-    ['🥱', 'Aga täna õhtul tundis Tiku, et tulemas on suur aeglane haigutus. Aaaah…'],
-    ['🌙', '„Väike täht,” sosistas Kuu, „isegi tähed peavad oma sära puhata laskma.”'],
-    ['☁️', 'Nii otsis Tiku üles kõige kohevama ja pehmema pilve terves taevas.'],
-    ['🛏️', 'Tiku puges pilve sisse ja tõmbas pilveräbala lõuani.'],
-    ['😴', 'Tema sära muutus pehmemaks… ja pehmemaks… ja aeglasemaks…'],
-    ['💤', 'Ja väike täht jäi sügavalt magama. Just nagu sina. Head ööd.'],
+    ['⭐', 'Kõrgel sametisel taeval, sealsamas Kuu kõrval, elas väike täht nimega Tiku. Ta oli kõige väiksem täht terves taevas.'],
+    ['✨', 'Igal õhtul, kui lapsed magama läksid, süttis Tiku sära. Ta vilkus ja keerutas ja kihistas naerda.'],
+    ['💫', 'Tiku parim sõber oli väike komeet nimega Vupsti. Koos mängisid nad taevas kullimängu, sabad pikalt lehvimas.'],
+    ['🥱', 'Aga täna õhtul tundis Tiku midagi imelikku. Tulemas oli suur ja aeglane haigutus. Aaaah… Ta silmad muutusid raskeks.'],
+    ['🌙', '„Väike täht,” sosistas Kuu pehmel häälel, „sa oled terve öö nii kõvasti säranud. Isegi tähed peavad vahel puhkama.”'],
+    ['🌠', '„Aga kes siis lastele valgust näitab?” küsis Tiku murelikult. „Mina valvan,” naeratas Kuu. „Mine sina puhka.”'],
+    ['☁️', 'Nii otsis Tiku üles kõige kohevama ja pehmema pilve terves taevas. See oli valge ja õrn nagu vahukomm.'],
+    ['🛏️', 'Tiku puges pilve sisse ja tõmbas pilveräbala lõuani. Pilv oli soe ja lõhnas õrnalt nagu suvine vihm.'],
+    ['🎶', 'Kaugel ümisesid teised tähed vaikset unelaulu. Vupsti lehvitas talle head ööd ja tõmbas taevasse viimase sätendava kaare.'],
+    ['😴', 'Tiku sära muutus pehmemaks… ja pehmemaks… ja aeglasemaks. Tema silmad vajusid tasakesi kinni.'],
+    ['🌌', 'Kuu kattis ta hõbedase valgusvaibaga ja hoidis tal silma peal. Terve taevas jäi vaikseks ja rahulikuks.'],
+    ['💤', 'Ja väike täht jäi sügavalt-sügavalt magama. Just nagu sina nüüd. Head ööd, väike täht. Head ööd, kallis laps.'],
   ]},
   { title: 'Karu suur haigutus', sub: 'haigutus, mis rändas läbi metsa', cover: '🐻', pages: [
-    ['🐻', 'Sügaval vaikses metsas haigutas Karu ühe hiigelsuure haigutuse.'],
-    ['🐰', 'Haigutus hõljus Jänkuni, kes haigutas ka. „Oi-oi,” ütles Jänku.'],
-    ['🦊', 'See triivis Rebaseni, kes haigutas kõige kohevama haigutuse üldse.'],
-    ['🦉', 'Isegi Öökull, kes armastab ööd, pilgutas aeglaselt silmi… ja haigutas.'],
-    ['🍂', 'Terve mets muutus hubaseks. Lehed sättisid end puudel magama.'],
-    ['🌛', 'Kuu tõmbas kõigile peale pehme hõbedase valgusteki.'],
-    ['😴', 'Karu keras end koopas kerra, soe nagu värske sai.'],
-    ['💤', 'Tasa… mets magab nüüd. Aeg nendega ühineda.'],
+    ['🐻', 'Sügaval vaikses metsas, suure kuuse all, elas Karu. Ta oli terve päeva mett otsinud ja marju korjanud.'],
+    ['🌅', 'Päike hakkas looja minema ja värvis taeva roosaks. „Küll ma olen väsinud,” pomises Karu endamisi.'],
+    ['🥱', 'Ja siis see juhtus. Karu haigutas ühe hiigelsuure haigutuse. See oli nii suur, et linnud puu otsas kõikuma lõid.'],
+    ['🐰', 'Haigutus hõljus üle metsa Jänkuni, kes parajasti porgandit näris. Jänku haigutas ka. „Oi-oi,” ütles ta unisel häälel.'],
+    ['🦊', 'Sealt edasi triivis haigutus Rebaseni. Rebane haigutas kõige kohevama haigutuse üldse — tema saba läks ka kohevile.'],
+    ['🦔', 'Väike Siil haigutas oma okaste all nii armsalt, et okkad sahisesid. Ta keras end kohe pehmete lehtede sisse.'],
+    ['🦌', 'Hirvepere haigutas üheskoos, kõik korraga. Hirvelapsed pugesid ema sooja külje alla magama.'],
+    ['🦉', 'Isegi Öökull, kes armastab ööd kõige rohkem, pilgutas aeglaselt suuri silmi… ja haigutas. „Uhhuu… nii unine.”'],
+    ['🍂', 'Terve mets muutus tasapisi hubaseks. Lehed sättisid end puudel magama ja tuul laulis vaikset hällilaulu.'],
+    ['🌛', 'Kuu tõusis puude kohale ja tõmbas kõigile peale pehme hõbedase valgusteki. Mets sätendas õrnalt.'],
+    ['😴', 'Karu keras end oma koopas kerra, soe nagu värske sai. Ta süda tuksus aeglaselt ja rahulikult. Tuks… tuks…'],
+    ['💤', 'Tasa-tasa… terve mets magab nüüd. Jänku magab, Rebane magab, Karu magab. Aeg sul ka nendega ühineda. Head ööd.'],
   ]},
   { title: 'Unenägude paat', sub: 'õrn sõit unemaale', cover: '⛵', pages: [
-    ['⛵', 'Iga päeva lõpus tuleb purjetades väike hõbedane paat.'],
-    ['🌊', 'See kiigub õrnalt merel, mis on tehtud tähevalgusest. Vulks… vulks…'],
-    ['🧸', 'Sinu kaisukaru ronib esimesena pardale ja leiab kõige mugavama koha.'],
-    ['🛌', 'Sina heidad pikali padjale, mis on pehme nagu vahukommipilv.'],
-    ['🐬', 'Unised delfiinid ümisevad paadi kõrval vaikset laulu.'],
-    ['🌌', 'Paat purjetab aeglaselt kaunite unenägude maa poole.'],
-    ['🌙', 'Kuu valgustab teed ja naeratab oma õrna naeratust.'],
-    ['💤', 'Pane silmad kinni… paat teab teed. Magusaid unenägusid.'],
+    ['⛵', 'Iga päeva lõpus, kui taevas läheb tumesiniseks, tuleb purjetades väike hõbedane paat. See on Unenägude paat.'],
+    ['🌊', 'Paat kiigub õrnalt merel, mis on tehtud puhtast tähevalgusest. Lained loksuvad tasa: vulks… vulks… vulks…'],
+    ['🧸', 'Sinu kaisukaru ronib esimesena pardale. Ta leiab kõige mugavama koha ja patsutab kohta enda kõrval — see on sinu jaoks.'],
+    ['🛌', 'Sina heidad pikali padjale, mis on pehme nagu vahukommipilv. Tekk on kerge nagu liblika tiib ja soe nagu päikesekiir.'],
+    ['🐬', 'Unised delfiinid ujuvad paadi kõrval ja ümisevad vaikset laulu. Nende laul kõlab nagu ema hääl, kui ta sind õrnalt suigutab.'],
+    ['🐟', 'Vee all ujuvad väikesed kalad, kellel on laternad. Nad näitavad paadile teed läbi pehme ja sooja öö.'],
+    ['🗼', 'Paat purjetab mööda Unenägude majakast. Majakas vilgutab sõbralikult: üks, kaks, kolm… head und, head und.'],
+    ['🏝️', 'Eemal paistab Unenägude saar. Seal kasvavad puud, mille küljes ripuvad kõige ilusamad unenäod nagu küpsed õunad.'],
+    ['🌌', 'Sa võid sealt valida ükskõik millise unenäo. Äkki lendamisest? Või kommimaast? Või sõpradest, kellega koos mängida?'],
+    ['🌙', 'Kuu valgustab teed ja naeratab oma kõige õrnemat naeratust. „Tere tulemast,” sosistab ta. „Ma ootasin sind.”'],
+    ['😴', 'Paat õõtsub tasa edasi-tagasi, edasi-tagasi. Su silmalaud muutuvad raskeks. Kaisukaru juba magab su kõrval.'],
+    ['💤', 'Pane silmad kinni… paat teab teed. Ta viib sind kõige ilusama unenäo juurde. Magusaid unenägusid, kallis laps.'],
   ]},
   { title: 'Punamütsike', sub: 'tüdruk, hunt ja vanaema', cover: '👧', pages: [
-    ['👧', 'Elas kord tüdruk, kes kandis alati punast mütsi. Kõik kutsusid teda Punamütsikeseks.'],
-    ['🧺', 'Ühel päeval palus ema tal viia haigele vanaemale korv kooke ja moosi.'],
-    ['🌲', 'Tee läks läbi metsa, kus linnud laulsid ja lilled lõhnasid magusalt.'],
-    ['🐺', 'Teel kohtas ta Hunti, kes küsis: „Kuhu sa lähed, väike tüdruk?”'],
-    ['🏡', 'Kaval hunt jõudis vanaema majja enne teda ja puges vanaema voodisse.'],
-    ['😮', '„Vanaema, miks sul nii suured kõrvad on?” imestas Punamütsike.'],
-    ['💪', 'Õnneks tuli mööda tark jahimees, kes hundi kaugele metsa minema ajas.'],
-    ['💤', 'Vanaema ja Punamütsike jõid sooja teed ja kõik oli jälle hästi. Head ööd.'],
+    ['👧', 'Elas kord väike tüdruk, kes kandis alati punast sametist mütsi. Sellepärast kutsusid kõik teda Punamütsikeseks.'],
+    ['🧺', 'Ühel hommikul ütles ema: „Vanaema on haige. Vii talle see korv — siin on kooke, moosi ja sooja teed.”'],
+    ['🌲', '„Mine mööda metsateed otse vanaema majja,” õpetas ema. „Ja ära võõrastega liiga kaua juttu aja.”'],
+    ['🌼', 'Mets oli ilus. Linnud laulsid, päike paistis läbi okste ja tee ääres kasvasid lilled. Punamütsike noppis väikese kimbu.'],
+    ['🐺', 'Järsku astus tema ette Hunt. „Tere, väike tüdruk,” ütles ta libedalt. „Kuhu sa nii kena korviga lähed?”'],
+    ['🏃', '„Vanaema juurde,” vastas Punamütsike. Kaval hunt muigas ja lippas läbi metsa otseteed pidi vanaema maja poole.'],
+    ['🏡', 'Hunt jõudis kohale esimesena, puges vanaema voodisse ja tõmbas tanu pähe. Vanaema oli õnneks peitu pugenud kappi.'],
+    ['😮', 'Punamütsike astus tuppa ja imestas: „Vanaema, miks sul nii suured kõrvad on?” — „Et sind paremini kuulda,” vastas hunt.'],
+    ['👀', '„Aga miks sul nii suured silmad on?” — „Et sind paremini näha.” — „Ja miks sul nii suur suu on?” Hunt hakkas just vastama…'],
+    ['💪', '…kui uks lendas lahti! Sisse astus tark jahimees, kes oli kõike akna tagant näinud. „Kasi metsa, Hunt, ja ära tagasi tule!”'],
+    ['🐺', 'Hunt kargas voodist välja ja pani sabaga vehkides kaugele metsa minema. Sellest päevast peale ei tülitanud ta enam kedagi.'],
+    ['☕', 'Vanaema tuli kapist välja ja kallistas Punamütsikest kõvasti. Koos jõid nad sooja teed ja sõid emaküpsetatud kooke.'],
+    ['💤', 'Õhtul viis jahimees Punamütsikese turvaliselt koju. Ema pani ta sooja voodisse magama. Kõik oli hästi. Head ööd.'],
   ]},
   { title: 'Kolm põrsakest', sub: 'kolm maja ja üks hunt', cover: '🐷', pages: [
-    ['🐷', 'Elasid kord kolm väikest põrsakest, kes otsustasid endale majad ehitada.'],
-    ['🌾', 'Esimene põrsake ehitas maja õlgedest. See sai ruttu valmis ja ta läks mängima.'],
-    ['🪵', 'Teine põrsake ehitas maja okstest. Ka tema sai kiiresti valmis.'],
-    ['🧱', 'Kolmas põrsake ladus hoolega kive. Tema maja võttis kaua aega, aga oli tugev.'],
-    ['🐺', 'Siis tuli hunt ja puhus: fuhh ja puhh! Õlgmaja ja oksamaja lendasid laiali.'],
-    ['🏃', 'Põrsakesed jooksid kiiresti kivimajja ja panid ukse lukku.'],
-    ['😤', 'Hunt puhus ja puhus, aga kivimaja ei liikunud paigast. Väsinud hunt läks koju.'],
-    ['💤', 'Kolm põrsakest jõid kakaod ja jäid soojas kivimajas magusasti magama. Head ööd.'],
+    ['🐷', 'Elasid kord kolm väikest põrsakest: Niff, Nuff ja Naff. Ühel kevadel otsustasid nad endale päris oma majad ehitada.'],
+    ['🌾', 'Niff oli kõige kärsitum. Ta ehitas maja õlgedest, sest see käis ruttu. „Valmis!” hõiskas ta ja läks liblikaid taga ajama.'],
+    ['🪵', 'Nuff ehitas maja okstest ja laudadest. Tükk aega toksis ta haamriga: kopp-kopp-kopp. Siis läks temagi mängima.'],
+    ['🧱', 'Naff aga ladus hoolega kivi kivi peale. Vennad naersid: „Sa ehitad nii kaua!” Aga Naff vastas: „Tugev maja tasub vaeva.”'],
+    ['🐺', 'Ühel õhtul tuli metsast näljane hunt. Ta koputas õlgmaja uksele: „Põrsake, lase mind sisse!” — „Ei iial!” piiksus Niff.'],
+    ['💨', '„Siis ma puhun ja puhun ja puhun su maja kokku!” Hunt võttis hoogu: fuhh ja puhh! Õled lendasid igale poole laiali.'],
+    ['🏃', 'Niff jooksis kiljudes venna oksamajja. Aga hunt tuli järele ja puhus uuesti: fuhh ja puhh ja PUHH! Oksad pudisesid koost.'],
+    ['🧱', 'Kaks põrsakest tormasid Naffi kivimajja. Naff pani ukse lukku ja lükkas riivi ette. „Siin oleme kaitstud,” ütles ta rahulikult.'],
+    ['😤', 'Hunt puhus ja puhus ja puhus, kuni nägu läks punaseks. Aga kivimaja ei liikunud paigast. Mitte üks kivigi ei kõikunud.'],
+    ['🪜', 'Hunt proovis veel katusele ronida, aga libises mööda siledat kivi alla ja maandus pehmesse sambla sisse. „Aitab küll!” ähkis ta.'],
+    ['🌙', 'Väsinud hunt lonkis koju metsa ja jäi sealsamas sambla peal magama. Ta otsustas, et homme sööb hoopis maasikaid.'],
+    ['☕', 'Kolm põrsakest istusid kivimajas kamina ees ja jõid sooja kakaod. „Ehitame kevadel teile ka kivimajad,” lubas Naff vendadele.'],
+    ['💤', 'Siis pugesid kolm väsinud põrsakest ühte suurde pehmesse voodisse ja jäid magusasti magama. Head ööd, väikesed põrsakesed.'],
   ]},
   { title: 'Lumivalgeke', sub: 'õun ja seitse pöialpoissi', cover: '🍎', pages: [
-    ['👸', 'Elas kord printsess, kelle nahk oli valge nagu lumi. Ta nimi oli Lumivalgeke.'],
-    ['🪞', 'Kuninganna küsis võlupeeglilt: „Kes on kõige kaunim?” Peegel vastas: „Lumivalgeke.”'],
-    ['🌲', 'Lumivalgeke läks metsa ja leidis sealt väikese armsa majakese.'],
-    ['⛏️', 'Majas elasid seitse pöialpoissi, kes võtsid ta rõõmuga enda juurde.'],
-    ['🍎', 'Ühel päeval pakkus võõras vanaproua talle õuna ja Lumivalgeke jäi sügavasse unne.'],
-    ['🕯️', 'Pöialpoisid valvasid teda ööd ja päevad ning hoidsid teda väga.'],
-    ['🤴', 'Siis tuli sõbralik prints ja tema õrn suudlus äratas Lumivalgekese üles.'],
-    ['💤', 'Kõik tantsisid rõõmust ja elasid õnnelikult. Nüüd aga silmad kinni. Head ööd.'],
+    ['👸', 'Elas kord printsess, kelle juuksed olid mustad nagu öö ja nahk valge nagu värske lumi. Ta nimi oli Lumivalgeke.'],
+    ['🪞', 'Lossis elas ka uhke kuninganna, kellel oli võlupeegel. „Peegel, peegel seina peal, kes on kõige kaunim siin maal?”'],
+    ['😠', '„Lumivalgeke,” vastas peegel ausalt. Kuninganna sai nii pahaseks, et Lumivalgeke otsustas lossist hoopis ära minna.'],
+    ['🌲', 'Ta kõndis läbi suure metsa, kuni jõudis väikese armsa majakese juurde. Uks oli lahti ja toas oli seitse pisikest voodit.'],
+    ['⛏️', 'Majas elasid seitse pöialpoissi, kes käisid mäe sees kalliskive kaevamas. Õhtul koju jõudes leidsid nad magava printsessi.'],
+    ['🍲', '„Jää meie juurde elama,” palusid pöialpoisid. Lumivalgeke jäigi. Ta keetis suppi, laulis laule ja maja oli rõõmu täis.'],
+    ['🍎', 'Aga ühel päeval, kui pöialpoisid tööl olid, tuli ukse taha võõras vanaproua. Ta pakkus Lumivalgekesele punast õuna.'],
+    ['😴', 'Lumivalgeke hammustas õuna — ja vajus samal hetkel sügavasse võluunne. See oli kadeda kuninganna võlutrikk.'],
+    ['🕯️', 'Pöialpoisid valvasid teda ööd ja päevad. Nad katsid ta sooja tekiga ja hoidsid küünla põlemas. Nad hoidsid teda väga.'],
+    ['🤴', 'Siis ratsutas metsast läbi sõbralik prints. Ta nägi kaunist magavat printsessi ja andis talle õrna musi põsele.'],
+    ['🎉', 'Võluuni katkes! Lumivalgeke avas silmad ja naeratas. Pöialpoisid hüppasid rõõmust nii kõrgele, et mütsid lendasid peast.'],
+    ['💤', 'Peeti suur pidu ja kõik elasid edaspidi õnnelikult. Nüüd aga, kallis laps, pane silmad kinni nagu Lumivalgeke. Head ööd.'],
   ]},
   { title: 'Tuhkatriinu', sub: 'klaasking ja kesköökell', cover: '👠', pages: [
-    ['🧹', 'Elas kord hea südamega tüdruk, keda kutsuti Tuhkatriinuks.'],
-    ['💌', 'Ühel päeval kutsus kuningas kõik kuningriigi inimesed lossi suurele ballile.'],
-    ['🧚', 'Hea haldjas viibutas võlukeppi: kleit hakkas sätendama ja kõrvitsast sai tõld.'],
-    ['👠', '„Kell kaksteist pead kodus olema,” ütles haldjas ja andis talle klaaskingad.'],
-    ['💃', 'Ballil tantsis prints terve õhtu ainult Tuhkatriinuga.'],
-    ['🕛', 'Kui kell lõi kaksteist, jooksis Tuhkatriinu koju ja üks king jäi trepile.'],
-    ['🤴', 'Prints otsis kinga omanikku kogu kuningriigist, kuni leidis Tuhkatriinu.'],
-    ['💤', 'Nad pidasid toredad pulmad ja elasid õnnelikult. Maga sina ka magusasti.'],
+    ['🧹', 'Elas kord hea südamega tüdruk, kes pidi hommikust õhtuni koristama ja nõusid pesema. Teda kutsuti Tuhkatriinuks.'],
+    ['💌', 'Ühel päeval saabus lossist kiri: kuningas kutsus kõik kuningriigi inimesed suurele ballile. Prints otsis endale pruuti.'],
+    ['😢', 'Kasuõed panid selga uhked kleidid ja sõitsid minema. „Sina jää koju,” ütlesid nad. Tuhkatriinu istus kurvalt kolde äärde.'],
+    ['🧚', 'Järsku sähvatas hele valgus — tema ette ilmus hea haldjas. „Ära nuta, kullake. Sina lähed ka ballile!”'],
+    ['🎃', 'Haldjas viibutas võlukeppi. Suurest kõrvitsast sai kuldne tõld ja kuuest hiirekesest said valged hobused.'],
+    ['👗', 'Veel üks võlusõna — ja Tuhkatriinu vana kleit muutus sätendavaks ballikleidiks. Jalga ilmusid imeilusad klaaskingad.'],
+    ['⏰', '„Üks asi veel,” ütles haldjas tõsiselt. „Kui kell lööb kaksteist, kaob võlujõud. Selleks ajaks pead kodus olema!”'],
+    ['💃', 'Ballil ei suutnud keegi Tuhkatriinult silmi pöörata. Prints palus teda tantsule ja tantsis temaga terve õhtu. Nad naersid koos.'],
+    ['🕛', 'Äkki hakkas suur kell lööma: kõmm, kõmm, kõmm! Kesköö! Tuhkatriinu jooksis trepist alla nii kiiresti, kui jalad võtsid.'],
+    ['👠', 'Kiirustades jäi üks klaasking trepile maha. Tõld muutus tagasi kõrvitsaks, aga Tuhkatriinu jõudis õigeks ajaks koju.'],
+    ['🔍', 'Prints leidis kinga ja otsis selle omanikku kogu kuningriigist. „Ma proovin kinga igale tüdrukule jalga,” lubas ta.'],
+    ['👑', 'Lõpuks jõudis ta Tuhkatriinu majja. King sobis täpselt! Prints tundis oma tantsupartneri kohe ära ja palus ta kätt.'],
+    ['💤', 'Peeti toredad pulmad ja Tuhkatriinu ei pidanud enam kunagi üksi koristama. Nad elasid õnnelikult. Maga sina ka magusasti.'],
   ]},
 ];
 const list = document.getElementById('storylist');
@@ -746,47 +720,6 @@ document.getElementById('rpage').addEventListener('click', () => {
 });
 document.getElementById('rclose').addEventListener('click', () => { reader.classList.remove('open'); quietTTS(); });
 
-/* ================= breathing buddy ================= */
-const buddy = document.getElementById('buddy');
-const bword = document.getElementById('bword');
-const bsub = document.getElementById('bsub');
-const bstars = document.getElementById('bstars');
-const bbtn = document.getElementById('bbtn');
-let breathing = false, btimers = [], breathCount = 0;
-const PHASES = [
-  ['in',   'Hinga sisse…', 'nuusuta lilleõit 🌸', 4000],
-  ['hold', 'Hoia…',        'väike paus ✨',        1500],
-  ['out',  'Hinga välja…', 'puhu küünal ära 🕯️',  6000],
-];
-function breatheLoop(p) {
-  if (!breathing) return;
-  const [cls, word, sub, ms] = PHASES[p];
-  buddy.className = cls;
-  bword.textContent = word; bsub.textContent = sub;
-  btimers.push(setTimeout(() => {
-    if (p === PHASES.length - 1) {
-      breathCount++;
-      bstars.textContent = '⭐'.repeat(Math.min(breathCount, 8));
-      if (breathCount >= 8) { stopBreathing('Nii rahulik… valmis voodisse 💛'); return; }
-    }
-    breatheLoop((p + 1) % PHASES.length);
-  }, ms));
-}
-function stopBreathing(msg) {
-  breathing = false;
-  btimers.forEach(clearTimeout); btimers = [];
-  buddy.className = 'out';
-  bword.textContent = msg || ' ';
-  bsub.textContent = msg ? 'head ööd, pisike' : ' ';
-  bbtn.textContent = 'Alusta hingamist ✨';
-}
-bbtn.addEventListener('click', () => {
-  if (breathing) { stopBreathing(); return; }
-  breathing = true; breathCount = 0; bstars.textContent = '';
-  bbtn.textContent = 'Aitab';
-  breatheLoop(0);
-});
-
 /* ================= routine ================= */
 const TASKS = [
   ['🧸', 'Korista mänguasjad ära'],
@@ -831,6 +764,15 @@ function updateMeter() {
 }
 document.getElementById('cclose').addEventListener('click', () =>
   document.getElementById('celebrate').classList.remove('open'));
+function resetTasks() {
+  done = [];
+  localStorage.setItem(todayKey, '[]');
+  document.querySelectorAll('.task').forEach(t => t.classList.remove('done'));
+  document.getElementById('celebrate').classList.remove('open');
+  updateMeter();
+}
+document.getElementById('resettasks').addEventListener('click', resetTasks);
+document.getElementById('creset').addEventListener('click', resetTasks);
 updateMeter();
 </script>
 </body>
