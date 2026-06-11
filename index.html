@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="et">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0e23">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Unemaa · Head ööd</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌙</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Quicksand:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0a0e23;
+  --ink-2: #131a3e;
+  --ink-3: #1d2552;
+  --moon: #ffd98a;
+  --moon-deep: #f6b756;
+  --lavender: #aab4ff;
+  --rose: #f3a6c0;
+  --text: #f0edff;
+  --muted: #8d96c9;
+  --card: rgba(170, 180, 255, 0.07);
+  --card-line: rgba(170, 180, 255, 0.16);
+  --glow: 0 0 24px rgba(255, 217, 138, 0.35);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  font-family: 'Quicksand', sans-serif;
+  background: var(--ink);
+  color: var(--text);
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ---------- night sky ---------- */
+#sky {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 120% 70% at 50% -10%, #2a3370 0%, transparent 55%),
+    radial-gradient(ellipse 90% 60% at 85% 110%, #251b4e 0%, transparent 60%),
+    linear-gradient(180deg, #0a0e23 0%, #0d1230 55%, #131243 100%);
+}
+.star { position: absolute; border-radius: 50%; background: #fff;
+  animation: twinkle var(--tw, 4s) ease-in-out infinite alternate; }
+@keyframes twinkle { from { opacity: .15; } to { opacity: var(--op, .9); } }
+#moon {
+  position: fixed; top: max(18px, env(safe-area-inset-top)); right: 22px; z-index: 1;
+  width: 64px; height: 64px; border-radius: 50%;
+  background: radial-gradient(circle at 38% 35%, #fff3d6, var(--moon) 55%, var(--moon-deep));
+  box-shadow: 0 0 40px 8px rgba(255, 217, 138, .28), inset -10px -8px 0 rgba(214, 158, 73, .35);
+  animation: moonfloat 9s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+#moon::before, #moon::after { content: ''; position: absolute; border-radius: 50%;
+  background: rgba(208, 152, 70, .3); }
+#moon::before { width: 13px; height: 13px; top: 14px; left: 13px; }
+#moon::after { width: 8px; height: 8px; top: 36px; left: 30px; }
+@keyframes moonfloat { from { transform: translateY(0); } to { transform: translateY(9px); } }
+.cloud {
+  position: fixed; z-index: 1; pointer-events: none; opacity: .5;
+  filter: blur(2px);
+  animation: drift linear infinite;
+}
+.cloud i { position: absolute; background: #232b5e; border-radius: 50%; display: block; }
+@keyframes drift { from { transform: translateX(-30vw); } to { transform: translateX(130vw); } }
+
+/* ---------- shell ---------- */
+#app { position: relative; z-index: 2; height: 100%; height: 100dvh;
+  display: flex; flex-direction: column; max-width: 520px; margin: 0 auto; }
+header { padding: calc(max(16px, env(safe-area-inset-top)) + 4px) 24px 4px; }
+header h1 {
+  font-family: 'Fredoka', sans-serif; font-weight: 600; font-size: 30px;
+  letter-spacing: .5px; color: var(--text);
+}
+header h1 span { color: var(--moon); }
+header p { color: var(--muted); font-size: 14px; font-weight: 500; margin-top: 2px; }
+main { flex: 1; overflow-y: auto; padding: 14px 20px 110px; scrollbar-width: none; }
+main::-webkit-scrollbar { display: none; }
+.screen { display: none; animation: rise .45s cubic-bezier(.2,.8,.3,1) both; }
+.screen.active { display: block; }
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.screen h2 { font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 21px; margin: 6px 2px 14px; }
+.screen h2 small { display: block; font-family: 'Quicksand'; font-size: 13px; font-weight: 500; color: var(--muted); margin-top: 3px; }
+
+/* ---------- nav ---------- */
+nav {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: max(14px, env(safe-area-inset-bottom)); z-index: 5;
+  display: flex; gap: 4px; padding: 7px;
+  background: rgba(16, 21, 52, .82); backdrop-filter: blur(14px);
+  border: 1px solid var(--card-line); border-radius: 26px;
+  box-shadow: 0 10px 35px rgba(0, 0, 5, .55);
+}
+nav button {
+  font-family: 'Fredoka', sans-serif; font-weight: 500;
+  border: 0; background: transparent; color: var(--muted);
+  padding: 9px 14px; border-radius: 19px; font-size: 12px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  transition: all .25s ease;
+}
+nav button .ico { font-size: 21px; transition: transform .25s ease; }
+nav button.on {
+  color: var(--ink); background: linear-gradient(160deg, #ffe3a6, var(--moon-deep));
+  box-shadow: var(--glow);
+}
+nav button.on .ico { transform: scale(1.12); }
+
+/* ---------- cards ---------- */
+.card {
+  background: var(--card); border: 1px solid var(--card-line);
+  border-radius: 22px; padding: 18px; margin-bottom: 12px;
+}
+
+/* ---------- sounds ---------- */
+#soundgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.snd {
+  position: relative; border: 1px solid var(--card-line); background: var(--card);
+  border-radius: 24px; padding: 22px 10px 16px; text-align: center; cursor: pointer;
+  transition: all .3s ease; overflow: hidden;
+}
+.snd .big { font-size: 42px; display: block; transition: transform .4s ease; }
+.snd .nm { font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 15px; margin-top: 8px; display: block; }
+.snd .st { font-size: 11px; color: var(--muted); display: block; margin-top: 1px; }
+.snd.playing {
+  background: linear-gradient(170deg, rgba(255, 217, 138, .16), rgba(170, 180, 255, .08));
+  border-color: rgba(255, 217, 138, .5); box-shadow: var(--glow);
+}
+.snd.playing .big { animation: bob 3s ease-in-out infinite; }
+@keyframes bob { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-5px) scale(1.06); } }
+.snd.playing .st { color: var(--moon); }
+.mixrow { display: flex; align-items: center; gap: 14px; }
+.mixrow .lbl { font-size: 20px; }
+input[type=range] { flex: 1; appearance: none; -webkit-appearance: none; height: 6px; border-radius: 3px;
+  background: var(--ink-3); outline: none; }
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 26px; height: 26px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff3d6, var(--moon-deep));
+  box-shadow: 0 0 12px rgba(255, 217, 138, .5); cursor: pointer;
+}
+.chips { display: flex; gap: 8px; margin-top: 14px; }
+.chip {
+  flex: 1; text-align: center; padding: 10px 0; border-radius: 14px; font-size: 13px;
+  font-family: 'Fredoka', sans-serif; font-weight: 500; color: var(--muted);
+  border: 1px solid var(--card-line); background: transparent; cursor: pointer; transition: all .25s;
+}
+.chip.on { color: var(--ink); background: var(--lavender); border-color: var(--lavender); }
+#timerleft { text-align: center; color: var(--muted); font-size: 13px; margin-top: 10px; min-height: 17px; }
+#stopsnd {
+  display: none; width: 100%; margin-top: 12px; padding: 14px; border-radius: 16px;
+  font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 16px;
+  color: var(--ink); background: linear-gradient(160deg, #ffe3a6, var(--moon-deep));
+  border: 0; cursor: pointer; box-shadow: var(--glow);
+}
+#stopsnd.show { display: block; }
+#stopsnd:active { transform: scale(.98); }
+
+/* ---------- stories ---------- */
+.storycard {
+  display: flex; align-items: center; gap: 16px; cursor: pointer;
+  transition: transform .2s ease, border-color .2s;
+}
+.storycard:active { transform: scale(.97); }
+.storycard .cover {
+  width: 64px; height: 64px; border-radius: 18px; flex-shrink: 0;
+  display: grid; place-items: center; font-size: 34px;
+  background: linear-gradient(160deg, var(--ink-3), var(--ink-2));
+  border: 1px solid var(--card-line);
+}
+.storycard h3 { font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 17px; }
+.storycard p { color: var(--muted); font-size: 13px; margin-top: 3px; }
+#reader {
+  position: fixed; inset: 0; z-index: 20; display: none;
+  flex-direction: column; background: linear-gradient(180deg, #0a0e23, #10103a);
+}
+#reader.open { display: flex; }
+#reader .top { display: flex; justify-content: space-between; align-items: center;
+  padding: calc(max(16px, env(safe-area-inset-top)) + 4px) 20px 0; }
+#reader .top button { background: var(--card); border: 1px solid var(--card-line); color: var(--text);
+  border-radius: 14px; padding: 8px 16px; font-family: 'Fredoka'; font-size: 14px; cursor: pointer; }
+#rspeak.on { background: linear-gradient(160deg, #ffe3a6, var(--moon-deep)); color: var(--ink);
+  border-color: transparent; box-shadow: var(--glow); }
+#rdots { display: flex; gap: 5px; }
+#rdots i { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-3); transition: background .3s; }
+#rdots i.done { background: var(--moon); }
+#rpage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 0 34px; cursor: pointer; }
+#remoji { font-size: 96px; animation: bob 5s ease-in-out infinite; filter: drop-shadow(0 0 30px rgba(255,217,138,.25)); }
+#rtext {
+  font-family: 'Fredoka', sans-serif; font-weight: 400; font-size: 24px; line-height: 1.55;
+  margin-top: 34px; max-width: 420px; animation: rise .5s ease both;
+}
+#rhint { color: var(--muted); font-size: 13px; padding-bottom: max(26px, env(safe-area-inset-bottom)); text-align: center; }
+
+/* ---------- breathe ---------- */
+#breathe-wrap { display: flex; flex-direction: column; align-items: center; padding-top: 8px; }
+#buddy {
+  position: relative; width: 190px; height: 190px; margin-top: 46px;
+  transition: transform 4s cubic-bezier(.45,0,.55,1);
+  transform: scale(.82);
+}
+#buddy .body {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #fff6e0, #ffe2a4 50%, var(--moon-deep));
+  box-shadow: 0 0 60px 12px rgba(255, 217, 138, .3), inset -14px -16px 0 rgba(214, 158, 73, .28);
+}
+.ear { position: absolute; width: 38px; height: 84px; border-radius: 50% 50% 45% 45%;
+  background: linear-gradient(180deg, #ffedc4, var(--moon-deep)); top: -56px; z-index: -1; }
+.ear::after { content: ''; position: absolute; inset: 14px 9px 16px;
+  border-radius: inherit; background: var(--rose); opacity: .65; }
+.ear.l { left: 34px; transform: rotate(-12deg); }
+.ear.r { right: 34px; transform: rotate(12deg); }
+.eye { position: absolute; top: 78px; width: 30px; height: 15px;
+  border-bottom: 4.5px solid #6b4a18; border-radius: 0 0 30px 30px; }
+.eye.l { left: 42px; } .eye.r { right: 42px; }
+.cheek { position: absolute; top: 104px; width: 22px; height: 12px; border-radius: 50%;
+  background: var(--rose); opacity: .55; }
+.cheek.l { left: 30px; } .cheek.r { right: 30px; }
+.mouth { position: absolute; top: 104px; left: 50%; transform: translateX(-50%);
+  width: 16px; height: 9px; border-bottom: 4px solid #6b4a18; border-radius: 0 0 16px 16px; }
+#buddy .ring {
+  position: absolute; inset: -26px; border-radius: 50%;
+  border: 2px dashed rgba(170, 180, 255, .35);
+  animation: spin 40s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+#buddy.in { transform: scale(1.16); }
+#buddy.hold { transform: scale(1.16); transition-duration: 1.5s; }
+#buddy.out { transform: scale(.82); transition-duration: 6s; }
+#bword { font-family: 'Fredoka', sans-serif; font-size: 26px; font-weight: 500;
+  margin-top: 52px; min-height: 36px; color: var(--moon); transition: opacity .4s; }
+#bsub { color: var(--muted); font-size: 14px; margin-top: 6px; min-height: 20px; }
+#bstars { margin-top: 18px; font-size: 22px; letter-spacing: 6px; min-height: 30px; }
+#bbtn {
+  margin-top: 26px; font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 17px;
+  color: var(--ink); background: linear-gradient(160deg, #ffe3a6, var(--moon-deep));
+  border: 0; border-radius: 20px; padding: 15px 44px; cursor: pointer; box-shadow: var(--glow);
+  transition: transform .2s;
+}
+#bbtn:active { transform: scale(.95); }
+
+/* ---------- routine ---------- */
+#moonmeter { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+#meterfill-wrap { flex: 1; height: 14px; background: var(--ink-3); border-radius: 7px; overflow: hidden; }
+#meterfill { height: 100%; width: 0%; border-radius: 7px;
+  background: linear-gradient(90deg, var(--lavender), var(--moon));
+  transition: width .6s cubic-bezier(.2,.8,.3,1); box-shadow: 0 0 12px rgba(255,217,138,.5); }
+#meterpct { font-family: 'Fredoka'; font-size: 15px; color: var(--moon); min-width: 38px; text-align: right; }
+.task {
+  display: flex; align-items: center; gap: 15px; padding: 15px 16px; margin-bottom: 10px;
+  background: var(--card); border: 1px solid var(--card-line); border-radius: 20px;
+  cursor: pointer; transition: all .3s ease;
+}
+.task:active { transform: scale(.98); }
+.task .te { font-size: 30px; transition: transform .3s; }
+.task .tl { flex: 1; font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 16.5px; }
+.task .tc {
+  width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--card-line);
+  display: grid; place-items: center; font-size: 17px; color: transparent; transition: all .3s ease;
+}
+.task.done { opacity: .65; background: rgba(255, 217, 138, .07); border-color: rgba(255, 217, 138, .3); }
+.task.done .tl { text-decoration: line-through; text-decoration-color: var(--moon-deep); }
+.task.done .te { transform: scale(1.18) rotate(-8deg); }
+.task.done .tc { background: var(--moon); border-color: var(--moon); color: var(--ink); }
+#celebrate {
+  position: fixed; inset: 0; z-index: 30; display: none; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center; padding: 30px;
+  background: rgba(8, 10, 28, .94); backdrop-filter: blur(8px);
+}
+#celebrate.open { display: flex; }
+#celebrate .cmoon { font-size: 110px; animation: bob 4s ease-in-out infinite; }
+#celebrate h2 { font-family: 'Fredoka'; font-size: 30px; margin-top: 22px; color: var(--moon); }
+#celebrate p { color: var(--muted); margin-top: 10px; font-size: 16px; line-height: 1.6; }
+#celebrate button { margin-top: 32px; font-family: 'Fredoka'; font-size: 16px; color: var(--text);
+  background: var(--card); border: 1px solid var(--card-line); border-radius: 18px;
+  padding: 13px 36px; cursor: pointer; }
+.flystar { position: fixed; z-index: 40; font-size: 22px; pointer-events: none;
+  animation: fly 1s ease-out forwards; }
+@keyframes fly {
+  0% { opacity: 1; transform: translate(0, 0) scale(1); }
+  100% { opacity: 0; transform: translate(var(--dx), -110px) scale(.4) rotate(120deg); }
+}
+</style>
+</head>
+<body>
+<div id="sky"></div>
+<div id="moon"></div>
+
+<div id="app">
+  <header>
+    <h1>Unemaa <span>🌙</span></h1>
+    <p>aeg uniseks jääda…</p>
+  </header>
+
+  <main>
+    <!-- SOUNDS -->
+    <section class="screen active" id="s-sounds">
+      <h2>Öised helid <small>vali üks ja lase sel ümiseda</small></h2>
+      <div id="soundgrid">
+        <div class="snd" data-snd="rain"><span class="big">🌧️</span><span class="nm">Vihm</span><span class="st">puuduta ja kuula</span></div>
+        <div class="snd" data-snd="ocean"><span class="big">🌊</span><span class="nm">Meri</span><span class="st">puuduta ja kuula</span></div>
+        <div class="snd" data-snd="wind"><span class="big">🍃</span><span class="nm">Tuulekohin</span><span class="st">puuduta ja kuula</span></div>
+        <div class="snd" data-snd="lullaby"><span class="big">🎵</span><span class="nm">Mängutoos</span><span class="st">puuduta ja kuula</span></div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <div class="mixrow"><span class="lbl">🔉</span><input type="range" id="vol" min="0" max="100" value="55"><span class="lbl">🔊</span></div>
+        <div class="chips">
+          <button class="chip" data-min="15">15 min</button>
+          <button class="chip" data-min="30">30 min</button>
+          <button class="chip" data-min="45">45 min</button>
+          <button class="chip on" data-min="0">∞</button>
+        </div>
+        <div id="timerleft"></div>
+        <button id="stopsnd">⏹ Peata heli</button>
+      </div>
+    </section>
+
+    <!-- STORIES -->
+    <section class="screen" id="s-stories">
+      <h2>Unejutud <small>lühikesed, iga leheküljega unisemad</small></h2>
+      <div id="storylist"></div>
+    </section>
+
+    <!-- BREATHE -->
+    <section class="screen" id="s-breathe">
+      <h2>Hinga koos Nunnuga <small>kuujänku hingab aeglaselt — tee järele</small></h2>
+      <div id="breathe-wrap">
+        <div id="buddy">
+          <div class="ring"></div>
+          <div class="ear l"></div><div class="ear r"></div>
+          <div class="body"></div>
+          <div class="eye l"></div><div class="eye r"></div>
+          <div class="cheek l"></div><div class="cheek r"></div>
+          <div class="mouth"></div>
+        </div>
+        <div id="bword">&nbsp;</div>
+        <div id="bsub">&nbsp;</div>
+        <div id="bstars"></div>
+        <button id="bbtn">Alusta hingamist ✨</button>
+      </div>
+    </section>
+
+    <!-- ROUTINE -->
+    <section class="screen" id="s-routine">
+      <h2>Unesammud <small>tee kõik ära, et kuu täis saaks</small></h2>
+      <div id="moonmeter">
+        <span style="font-size:22px">🌒</span>
+        <div id="meterfill-wrap"><div id="meterfill"></div></div>
+        <span id="meterpct">0%</span>
+        <span style="font-size:22px">🌕</span>
+      </div>
+      <div id="tasklist"></div>
+    </section>
+  </main>
+
+  <nav>
+    <button class="on" data-scr="sounds"><span class="ico">🌧️</span>Helid</button>
+    <button data-scr="stories"><span class="ico">📖</span>Jutud</button>
+    <button data-scr="breathe"><span class="ico">🐰</span>Hinga</button>
+    <button data-scr="routine"><span class="ico">⭐</span>Sammud</button>
+  </nav>
+</div>
+
+<!-- story reader -->
+<div id="reader">
+  <div class="top"><button id="rclose">← Tagasi</button><div id="rdots"></div><button id="rspeak">🔇 Loe ette</button></div>
+  <div id="rpage"><div id="remoji"></div><div id="rtext"></div></div>
+  <div id="rhint">puuduta ekraani, et lehte keerata</div>
+</div>
+
+<!-- routine celebration -->
+<div id="celebrate">
+  <div class="cmoon">🌝</div>
+  <h2>Kõik tehtud, supertäht!</h2>
+  <p>Iga unesamm on tehtud.<br>Kuu on täis ja sinu üle uhke.<br><b>Head ööd, maga magusasti! 💤</b></p>
+  <button id="cclose">Sulge</button>
+</div>
+
+<script>
+/* ================= stars & clouds ================= */
+(function makeSky() {
+  const sky = document.getElementById('sky');
+  for (let i = 0; i < 90; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const sz = Math.random() < .85 ? 1.5 : 2.5;
+    s.style.cssText = `left:${Math.random() * 100}%;top:${Math.random() * 100}%;width:${sz}px;height:${sz}px;` +
+      `--tw:${2.5 + Math.random() * 4}s;--op:${.4 + Math.random() * .6};animation-delay:${Math.random() * 4}s`;
+    sky.appendChild(s);
+  }
+  const clouds = [{ t: 12, s: 1, d: 95 }, { t: 34, s: .7, d: 140 }, { t: 62, s: .85, d: 115 }];
+  clouds.forEach((c, i) => {
+    const el = document.createElement('div');
+    el.className = 'cloud';
+    el.style.cssText = `top:${c.t}%;animation-duration:${c.d}s;animation-delay:${-c.d * (i + 1) / 3.5}s`;
+    el.innerHTML = `<i style="width:${90 * c.s}px;height:${28 * c.s}px;border-radius:${14 * c.s}px"></i>` +
+      `<i style="width:${42 * c.s}px;height:${30 * c.s}px;left:${16 * c.s}px;top:${-14 * c.s}px"></i>` +
+      `<i style="width:${34 * c.s}px;height:${24 * c.s}px;left:${46 * c.s}px;top:${-10 * c.s}px"></i>`;
+    document.body.appendChild(el);
+  });
+})();
+
+/* ================= nav ================= */
+document.querySelectorAll('nav button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x === b));
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === 's-' + b.dataset.scr));
+}));
+
+/* ================= sound engine (Web Audio, fully synthesized) ================= */
+const Snd = {
+  ctx: null, master: null, current: null, nodes: [], timers: [],
+  fadeTimer: null, stopTimer: null, timerMin: 0, timerEnd: 0, tickInt: null,
+
+  init() {
+    if (this.ctx) return;
+    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    this.master = this.ctx.createGain();
+    this.master.gain.value = document.getElementById('vol').value / 100;
+    this.master.connect(this.ctx.destination);
+  },
+
+  noiseBuffer(brown) {
+    const len = this.ctx.sampleRate * 2.5;
+    const buf = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    let last = 0;
+    for (let i = 0; i < len; i++) {
+      const w = Math.random() * 2 - 1;
+      if (brown) { last = (last + 0.02 * w) / 1.02; d[i] = last * 3.5; }
+      else d[i] = w;
+    }
+    return buf;
+  },
+
+  loopNoise(brown, filterType, freq, gain) {
+    const src = this.ctx.createBufferSource();
+    src.buffer = this.noiseBuffer(brown); src.loop = true;
+    const f = this.ctx.createBiquadFilter(); f.type = filterType; f.frequency.value = freq;
+    const g = this.ctx.createGain(); g.gain.value = gain;
+    src.connect(f).connect(g).connect(this.master);
+    src.start();
+    this.nodes.push(src, f, g);
+    return g;
+  },
+
+  startRain() {
+    this.loopNoise(false, 'lowpass', 3200, 0.16);
+    const hp = this.loopNoise(false, 'highpass', 5000, 0.04); // light patter sheen
+    const drip = () => {
+      if (this.current !== 'rain') return;
+      const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+      o.type = 'sine'; o.frequency.value = 700 + Math.random() * 1900;
+      const t = this.ctx.currentTime;
+      g.gain.setValueAtTime(0.05 + Math.random() * 0.05, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
+      o.connect(g).connect(this.master); o.start(t); o.stop(t + 0.1);
+      this.timers.push(setTimeout(drip, 90 + Math.random() * 350));
+    };
+    drip();
+  },
+
+  startOcean() {
+    const g = this.loopNoise(true, 'lowpass', 650, 0.55);
+    const lfo = this.ctx.createOscillator(), lg = this.ctx.createGain();
+    lfo.frequency.value = 0.08; lg.gain.value = 0.3;
+    lfo.connect(lg).connect(g.gain); lfo.start();
+    this.nodes.push(lfo, lg);
+  },
+
+  startWind() {
+    const g = this.loopNoise(true, 'lowpass', 1100, 0.45);
+    const lfo = this.ctx.createOscillator(), lg = this.ctx.createGain();
+    lfo.frequency.value = 0.05; lg.gain.value = 0.13;
+    lfo.connect(lg).connect(g.gain); lfo.start();
+    this.nodes.push(lfo, lg);
+  },
+
+  startLullaby() {
+    // Brahms' Lullaby, music-box style. [midi, beats]
+    const tune = [
+      [64,1],[64,1],[67,2.5],[64,1],[64,1],[67,2.5],
+      [64,1],[67,1],[72,1.5],[71,.5],[69,1.5],[69,1],[67,2.5],
+      [62,1],[64,1],[65,2],[62,1],[64,1],[65,2.5],
+      [62,1],[65,1],[71,1],[69,1],[67,1],[71,1],[72,3.5],
+    ];
+    const beat = 0.62, gapLoop = 2.2;
+    // all notes go through one bus so stop() can cut already-scheduled notes
+    const bus = this.ctx.createGain();
+    bus.connect(this.master);
+    this.nodes.push(bus);
+    const playNote = (midi, t, dur) => {
+      const f = 440 * Math.pow(2, (midi - 69) / 12);
+      [[1, 0.10], [2, 0.035]].forEach(([mult, vol]) => { // fundamental + sparkle octave
+        const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+        o.type = 'triangle'; o.frequency.value = f * mult;
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(vol, t + 0.012);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + Math.max(dur * beat, 1.4));
+        o.connect(g).connect(bus);
+        o.start(t); o.stop(t + Math.max(dur * beat, 1.4) + 0.1);
+      });
+    };
+    const schedule = () => {
+      if (this.current !== 'lullaby') return;
+      let t = this.ctx.currentTime + 0.15;
+      tune.forEach(([m, d]) => { playNote(m, t, d); t += d * beat; });
+      const total = (t - this.ctx.currentTime + gapLoop) * 1000;
+      this.timers.push(setTimeout(schedule, total));
+    };
+    schedule();
+  },
+
+  stop() {
+    this.timers.forEach(clearTimeout); this.timers = [];
+    this.nodes.forEach(n => { try { n.stop ? n.stop() : 0; n.disconnect(); } catch (e) {} });
+    this.nodes = [];
+    this.current = null;
+    document.querySelectorAll('.snd').forEach(c => {
+      c.classList.remove('playing'); c.querySelector('.st').textContent = 'puuduta ja kuula';
+    });
+    document.getElementById('stopsnd').classList.remove('show');
+  },
+
+  toggle(name, card) {
+    this.init();
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+    const was = this.current === name;
+    this.stop();
+    if (was) return;
+    this.current = name;
+    ({ rain: () => this.startRain(), ocean: () => this.startOcean(),
+       wind: () => this.startWind(), lullaby: () => this.startLullaby() })[name]();
+    card.classList.add('playing');
+    card.querySelector('.st').textContent = 'mängib · puuduta, et peatada';
+    document.getElementById('stopsnd').classList.add('show');
+    this.armTimer();
+  },
+
+  setTimerMin(min) {
+    this.timerMin = min;
+    this.armTimer();
+  },
+
+  armTimer() {
+    clearTimeout(this.stopTimer); clearInterval(this.tickInt);
+    document.getElementById('timerleft').textContent = '';
+    if (!this.timerMin || !this.current) return;
+    this.timerEnd = Date.now() + this.timerMin * 60000;
+    const FADE = 60; // fade out over final 60s
+    this.stopTimer = setTimeout(() => {
+      if (!this.ctx || !this.current) return;
+      const t = this.ctx.currentTime;
+      this.master.gain.setValueAtTime(this.master.gain.value, t);
+      this.master.gain.linearRampToValueAtTime(0.0001, t + FADE);
+      this.timers.push(setTimeout(() => {
+        this.stop();
+        this.master.gain.value = document.getElementById('vol').value / 100;
+      }, FADE * 1000));
+    }, Math.max(0, this.timerMin * 60000 - FADE * 1000));
+    const tick = () => {
+      const left = this.timerEnd - Date.now();
+      if (left <= 0 || !this.current) { clearInterval(this.tickInt); document.getElementById('timerleft').textContent = ''; return; }
+      const m = Math.floor(left / 60000), s = Math.floor(left % 60000 / 1000);
+      document.getElementById('timerleft').textContent = `🌙 vaibub ${m}:${String(s).padStart(2, '0')} pärast`;
+    };
+    tick(); this.tickInt = setInterval(tick, 1000);
+  }
+};
+document.querySelectorAll('.snd').forEach(c =>
+  c.addEventListener('click', () => Snd.toggle(c.dataset.snd, c)));
+document.getElementById('vol').addEventListener('input', e => {
+  if (Snd.master) Snd.master.gain.value = e.target.value / 100;
+});
+document.querySelectorAll('.chip').forEach(ch => ch.addEventListener('click', () => {
+  document.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === ch));
+  Snd.setTimerMin(+ch.dataset.min);
+}));
+document.getElementById('stopsnd').addEventListener('click', () => Snd.stop());
+
+/* ================= stories ================= */
+const STORIES = [
+  { title: 'Unine väike täht', sub: 'täht õpib puhkama', cover: '⭐', pages: [
+    ['⭐', 'Kõrgel sametisel taeval elas väike täht nimega Tiku.'],
+    ['✨', 'Terve öö Tiku säras ja keerutas ja kihistas naerda.'],
+    ['🥱', 'Aga täna õhtul tundis Tiku, et tulemas on suur aeglane haigutus. Aaaah…'],
+    ['🌙', '„Väike täht,” sosistas Kuu, „isegi tähed peavad oma sära puhata laskma.”'],
+    ['☁️', 'Nii otsis Tiku üles kõige kohevama ja pehmema pilve terves taevas.'],
+    ['🛏️', 'Tiku puges pilve sisse ja tõmbas pilveräbala lõuani.'],
+    ['😴', 'Tema sära muutus pehmemaks… ja pehmemaks… ja aeglasemaks…'],
+    ['💤', 'Ja väike täht jäi sügavalt magama. Just nagu sina. Head ööd.'],
+  ]},
+  { title: 'Karu suur haigutus', sub: 'haigutus, mis rändas läbi metsa', cover: '🐻', pages: [
+    ['🐻', 'Sügaval vaikses metsas haigutas Karu ühe hiigelsuure haigutuse.'],
+    ['🐰', 'Haigutus hõljus Jänkuni, kes haigutas ka. „Oi-oi,” ütles Jänku.'],
+    ['🦊', 'See triivis Rebaseni, kes haigutas kõige kohevama haigutuse üldse.'],
+    ['🦉', 'Isegi Öökull, kes armastab ööd, pilgutas aeglaselt silmi… ja haigutas.'],
+    ['🍂', 'Terve mets muutus hubaseks. Lehed sättisid end puudel magama.'],
+    ['🌛', 'Kuu tõmbas kõigile peale pehme hõbedase valgusteki.'],
+    ['😴', 'Karu keras end koopas kerra, soe nagu värske sai.'],
+    ['💤', 'Tasa… mets magab nüüd. Aeg nendega ühineda.'],
+  ]},
+  { title: 'Unenägude paat', sub: 'õrn sõit unemaale', cover: '⛵', pages: [
+    ['⛵', 'Iga päeva lõpus tuleb purjetades väike hõbedane paat.'],
+    ['🌊', 'See kiigub õrnalt merel, mis on tehtud tähevalgusest. Vulks… vulks…'],
+    ['🧸', 'Sinu kaisukaru ronib esimesena pardale ja leiab kõige mugavama koha.'],
+    ['🛌', 'Sina heidad pikali padjale, mis on pehme nagu vahukommipilv.'],
+    ['🐬', 'Unised delfiinid ümisevad paadi kõrval vaikset laulu.'],
+    ['🌌', 'Paat purjetab aeglaselt kaunite unenägude maa poole.'],
+    ['🌙', 'Kuu valgustab teed ja naeratab oma õrna naeratust.'],
+    ['💤', 'Pane silmad kinni… paat teab teed. Magusaid unenägusid.'],
+  ]},
+  { title: 'Punamütsike', sub: 'tüdruk, hunt ja vanaema', cover: '👧', pages: [
+    ['👧', 'Elas kord tüdruk, kes kandis alati punast mütsi. Kõik kutsusid teda Punamütsikeseks.'],
+    ['🧺', 'Ühel päeval palus ema tal viia haigele vanaemale korv kooke ja moosi.'],
+    ['🌲', 'Tee läks läbi metsa, kus linnud laulsid ja lilled lõhnasid magusalt.'],
+    ['🐺', 'Teel kohtas ta Hunti, kes küsis: „Kuhu sa lähed, väike tüdruk?”'],
+    ['🏡', 'Kaval hunt jõudis vanaema majja enne teda ja puges vanaema voodisse.'],
+    ['😮', '„Vanaema, miks sul nii suured kõrvad on?” imestas Punamütsike.'],
+    ['💪', 'Õnneks tuli mööda tark jahimees, kes hundi kaugele metsa minema ajas.'],
+    ['💤', 'Vanaema ja Punamütsike jõid sooja teed ja kõik oli jälle hästi. Head ööd.'],
+  ]},
+  { title: 'Kolm põrsakest', sub: 'kolm maja ja üks hunt', cover: '🐷', pages: [
+    ['🐷', 'Elasid kord kolm väikest põrsakest, kes otsustasid endale majad ehitada.'],
+    ['🌾', 'Esimene põrsake ehitas maja õlgedest. See sai ruttu valmis ja ta läks mängima.'],
+    ['🪵', 'Teine põrsake ehitas maja okstest. Ka tema sai kiiresti valmis.'],
+    ['🧱', 'Kolmas põrsake ladus hoolega kive. Tema maja võttis kaua aega, aga oli tugev.'],
+    ['🐺', 'Siis tuli hunt ja puhus: fuhh ja puhh! Õlgmaja ja oksamaja lendasid laiali.'],
+    ['🏃', 'Põrsakesed jooksid kiiresti kivimajja ja panid ukse lukku.'],
+    ['😤', 'Hunt puhus ja puhus, aga kivimaja ei liikunud paigast. Väsinud hunt läks koju.'],
+    ['💤', 'Kolm põrsakest jõid kakaod ja jäid soojas kivimajas magusasti magama. Head ööd.'],
+  ]},
+  { title: 'Lumivalgeke', sub: 'õun ja seitse pöialpoissi', cover: '🍎', pages: [
+    ['👸', 'Elas kord printsess, kelle nahk oli valge nagu lumi. Ta nimi oli Lumivalgeke.'],
+    ['🪞', 'Kuninganna küsis võlupeeglilt: „Kes on kõige kaunim?” Peegel vastas: „Lumivalgeke.”'],
+    ['🌲', 'Lumivalgeke läks metsa ja leidis sealt väikese armsa majakese.'],
+    ['⛏️', 'Majas elasid seitse pöialpoissi, kes võtsid ta rõõmuga enda juurde.'],
+    ['🍎', 'Ühel päeval pakkus võõras vanaproua talle õuna ja Lumivalgeke jäi sügavasse unne.'],
+    ['🕯️', 'Pöialpoisid valvasid teda ööd ja päevad ning hoidsid teda väga.'],
+    ['🤴', 'Siis tuli sõbralik prints ja tema õrn suudlus äratas Lumivalgekese üles.'],
+    ['💤', 'Kõik tantsisid rõõmust ja elasid õnnelikult. Nüüd aga silmad kinni. Head ööd.'],
+  ]},
+  { title: 'Tuhkatriinu', sub: 'klaasking ja kesköökell', cover: '👠', pages: [
+    ['🧹', 'Elas kord hea südamega tüdruk, keda kutsuti Tuhkatriinuks.'],
+    ['💌', 'Ühel päeval kutsus kuningas kõik kuningriigi inimesed lossi suurele ballile.'],
+    ['🧚', 'Hea haldjas viibutas võlukeppi: kleit hakkas sätendama ja kõrvitsast sai tõld.'],
+    ['👠', '„Kell kaksteist pead kodus olema,” ütles haldjas ja andis talle klaaskingad.'],
+    ['💃', 'Ballil tantsis prints terve õhtu ainult Tuhkatriinuga.'],
+    ['🕛', 'Kui kell lõi kaksteist, jooksis Tuhkatriinu koju ja üks king jäi trepile.'],
+    ['🤴', 'Prints otsis kinga omanikku kogu kuningriigist, kuni leidis Tuhkatriinu.'],
+    ['💤', 'Nad pidasid toredad pulmad ja elasid õnnelikult. Maga sina ka magusasti.'],
+  ]},
+];
+const list = document.getElementById('storylist');
+STORIES.forEach((st, i) => {
+  const el = document.createElement('div');
+  el.className = 'card storycard';
+  el.innerHTML = `<div class="cover">${st.cover}</div><div><h3>${st.title}</h3><p>${st.sub} · ${st.pages.length} lehekülge</p></div>`;
+  el.addEventListener('click', () => openStory(i));
+  list.appendChild(el);
+});
+const reader = document.getElementById('reader');
+let curStory = 0, curPage = 0;
+
+/* read-aloud (Web Speech API) */
+const rspeak = document.getElementById('rspeak');
+const hasTTS = 'speechSynthesis' in window;
+let speakOn = localStorage.getItem('unemaa-speak') === '1';
+let etVoice = null, narrator = null;
+function pickVoice() {
+  const vs = speechSynthesis.getVoices();
+  etVoice = vs.find(v => v.lang.toLowerCase().startsWith('et')) || null;
+}
+if (hasTTS) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function updateSpeakBtn() {
+  rspeak.classList.toggle('on', speakOn);
+  rspeak.textContent = speakOn ? '🔊 Loeb ette' : '🔇 Loe ette';
+}
+function speakPageTTS() {
+  if (!hasTTS) return;
+  const u = new SpeechSynthesisUtterance(STORIES[curStory].pages[curPage][1]);
+  u.lang = 'et-EE'; u.rate = 0.85; u.pitch = 1.05;
+  if (etVoice) u.voice = etVoice;
+  speechSynthesis.speak(u);
+}
+function speakPage() {
+  if (!speakOn) return;
+  quietTTS();
+  // pre-generated narration first, system voice as fallback
+  const base = `audio/s${curStory}p${curPage}`;
+  const tryPlay = exts => {
+    if (!exts.length) { speakPageTTS(); return; }
+    const a = new Audio(base + exts[0]);
+    a.preservesPitch = true; a.webkitPreservesPitch = true; // keep voice natural when slowed
+    a.playbackRate = 0.8;
+    narrator = a;
+    let failed = false;
+    const fail = () => {
+      if (failed || narrator !== a) return;
+      failed = true;
+      tryPlay(exts.slice(1));
+    };
+    a.onerror = fail;
+    a.play().catch(fail);
+  };
+  tryPlay(['.mp3', '.wav']);
+}
+function quietTTS() {
+  if (narrator) { narrator.onerror = null; narrator.pause(); narrator = null; }
+  if (hasTTS) speechSynthesis.cancel();
+}
+rspeak.addEventListener('click', () => {
+  speakOn = !speakOn;
+  localStorage.setItem('unemaa-speak', speakOn ? '1' : '0');
+  updateSpeakBtn();
+  if (speakOn) speakPage(); else quietTTS();
+});
+
+function openStory(i) {
+  curStory = i; curPage = 0;
+  reader.classList.add('open');
+  document.getElementById('rdots').innerHTML = STORIES[i].pages.map(() => '<i></i>').join('');
+  updateSpeakBtn();
+  showPage();
+}
+function showPage() {
+  const st = STORIES[curStory], pg = st.pages[curPage];
+  const txt = document.getElementById('rtext');
+  document.getElementById('remoji').textContent = pg[0];
+  txt.textContent = pg[1];
+  txt.style.animation = 'none'; void txt.offsetWidth; txt.style.animation = '';
+  // get dimmer + sleepier as the story goes on
+  const prog = curPage / (st.pages.length - 1);
+  document.getElementById('rpage').style.opacity = 1 - prog * 0.25;
+  document.getElementById('rdots').querySelectorAll('i').forEach((d, j) => d.classList.toggle('done', j <= curPage));
+  document.getElementById('rhint').textContent =
+    curPage === st.pages.length - 1 ? 'lõpp 🌙 puuduta, et sulgeda' : 'puuduta ekraani, et lehte keerata';
+  speakPage();
+}
+document.getElementById('rpage').addEventListener('click', () => {
+  if (curPage < STORIES[curStory].pages.length - 1) { curPage++; showPage(); }
+  else { reader.classList.remove('open'); quietTTS(); }
+});
+document.getElementById('rclose').addEventListener('click', () => { reader.classList.remove('open'); quietTTS(); });
+
+/* ================= breathing buddy ================= */
+const buddy = document.getElementById('buddy');
+const bword = document.getElementById('bword');
+const bsub = document.getElementById('bsub');
+const bstars = document.getElementById('bstars');
+const bbtn = document.getElementById('bbtn');
+let breathing = false, btimers = [], breathCount = 0;
+const PHASES = [
+  ['in',   'Hinga sisse…', 'nuusuta lilleõit 🌸', 4000],
+  ['hold', 'Hoia…',        'väike paus ✨',        1500],
+  ['out',  'Hinga välja…', 'puhu küünal ära 🕯️',  6000],
+];
+function breatheLoop(p) {
+  if (!breathing) return;
+  const [cls, word, sub, ms] = PHASES[p];
+  buddy.className = cls;
+  bword.textContent = word; bsub.textContent = sub;
+  btimers.push(setTimeout(() => {
+    if (p === PHASES.length - 1) {
+      breathCount++;
+      bstars.textContent = '⭐'.repeat(Math.min(breathCount, 8));
+      if (breathCount >= 8) { stopBreathing('Nii rahulik… valmis voodisse 💛'); return; }
+    }
+    breatheLoop((p + 1) % PHASES.length);
+  }, ms));
+}
+function stopBreathing(msg) {
+  breathing = false;
+  btimers.forEach(clearTimeout); btimers = [];
+  buddy.className = 'out';
+  bword.textContent = msg || ' ';
+  bsub.textContent = msg ? 'head ööd, pisike' : ' ';
+  bbtn.textContent = 'Alusta hingamist ✨';
+}
+bbtn.addEventListener('click', () => {
+  if (breathing) { stopBreathing(); return; }
+  breathing = true; breathCount = 0; bstars.textContent = '';
+  bbtn.textContent = 'Aitab';
+  breatheLoop(0);
+});
+
+/* ================= routine ================= */
+const TASKS = [
+  ['🧸', 'Korista mänguasjad ära'],
+  ['🛁', 'Pesule ja potile'],
+  ['🦷', 'Pese hambad puhtaks'],
+  ['👕', 'Pidžaama selga'],
+  ['💧', 'Lonks vett'],
+  ['📖', 'Üks unejutt'],
+  ['🤗', 'Suur unekalli'],
+  ['🌙', 'Tuled kustu, silmad kinni'],
+];
+const todayKey = 'unemaa-' + new Date().toISOString().slice(0, 10);
+let done = JSON.parse(localStorage.getItem(todayKey) || '[]');
+const tlist = document.getElementById('tasklist');
+TASKS.forEach(([e, l], i) => {
+  const el = document.createElement('div');
+  el.className = 'task' + (done.includes(i) ? ' done' : '');
+  el.innerHTML = `<span class="te">${e}</span><span class="tl">${l}</span><span class="tc">✓</span>`;
+  el.addEventListener('click', ev => {
+    const idx = done.indexOf(i);
+    if (idx > -1) done.splice(idx, 1); else { done.push(i); flyStars(ev.clientX, ev.clientY); }
+    el.classList.toggle('done', done.includes(i));
+    localStorage.setItem(todayKey, JSON.stringify(done));
+    updateMeter();
+  });
+  tlist.appendChild(el);
+});
+function flyStars(x, y) {
+  for (let i = 0; i < 5; i++) {
+    const s = document.createElement('div');
+    s.className = 'flystar'; s.textContent = ['⭐', '✨', '🌟'][i % 3];
+    s.style.cssText = `left:${x - 10}px;top:${y - 10}px;--dx:${(Math.random() - .5) * 160}px;animation-delay:${i * 60}ms`;
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 1400);
+  }
+}
+function updateMeter() {
+  const pct = Math.round(done.length / TASKS.length * 100);
+  document.getElementById('meterfill').style.width = pct + '%';
+  document.getElementById('meterpct').textContent = pct + '%';
+  if (pct === 100) setTimeout(() => document.getElementById('celebrate').classList.add('open'), 650);
+}
+document.getElementById('cclose').addEventListener('click', () =>
+  document.getElementById('celebrate').classList.remove('open'));
+updateMeter();
+</script>
+</body>
+</html>
