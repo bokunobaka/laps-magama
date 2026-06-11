@@ -893,7 +893,7 @@ document.getElementById('rclose').addEventListener('click', () => { reader.class
 /* ================= ERR õhtujutt (lasteekraan.err.ee, CORS-open API + CDN) ================= */
 const ERR_API = 'https://services.err.ee/api/v2/vodContent/getContentPageData?contentId=';
 const ERR_SEED = 1610028683; // any Õhtujutt episode id — its page data carries the series archive
-const errSt = { months: [], loaded: 0, inited: false, audio: null, playingId: null };
+const errSt = { months: [], loaded: 0, day: null, loading: false, audio: null, playingId: null };
 async function errFetch(id) {
   const r = await fetch(ERR_API + id);
   if (!r.ok) throw new Error('http ' + r.status);
@@ -912,28 +912,36 @@ function errAddMonth(m) {
   h.className = 'errmonth'; h.textContent = m.label;
   list.appendChild(h);
   for (const ep of m.contents) {
-    const d = new Date(ep.publicStart * 1000);
+    // scheduleStart = broadcast date; publicStart is the (batched) upload time
+    const d = new Date(ep.scheduleStart * 1000);
     const row = document.createElement('div');
     row.className = 'card ep';
     row.innerHTML = `<span class="epd">${d.getDate()}.${String(d.getMonth() + 1).padStart(2, '0')}</span>` +
       `<span class="ept">${ep.heading.replace(/^Õhtujutt( lastele)?[.,]?\s*/i, '')}</span><span class="epp">▶</span>`;
     row.addEventListener('click', () => errPlay(ep, row));
+    if (ep.id === errSt.playingId) { row.classList.add('playing'); row.querySelector('.epp').textContent = '⏸'; }
     list.appendChild(row);
   }
 }
 async function errInit() {
-  if (errSt.inited) return;
-  errSt.inited = true;
+  // refresh whenever the tab is opened on a new calendar day, so a session
+  // that stays alive on the tablet still picks up freshly published episodes
+  const today = new Date().toDateString();
+  if (errSt.day === today || errSt.loading) return;
+  errSt.loading = true;
   try {
     const data = await errFetch(ERR_SEED);
     errSt.months = errMonthsFrom(data);
+    errSt.loaded = 0;
     document.getElementById('errlist').innerHTML = '';
     await errLoadNextMonth();
     document.getElementById('errmore').style.display = 'block';
+    errSt.day = today;
   } catch (e) {
-    errSt.inited = false; // allow retry on next tab visit
     document.getElementById('errlist').innerHTML =
       '<div class="errmsg">Juttude laadimine ebaõnnestus 😴<br>Kontrolli internetiühendust ja proovi uuesti.</div>';
+  } finally {
+    errSt.loading = false;
   }
 }
 async function errLoadNextMonth() {
