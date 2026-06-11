@@ -11,7 +11,8 @@ One self-contained `index.html` — no build step, no framework, no server-side 
 - **Unejutud** — seven bedtime stories (12–13 pages each) with big calm text that
   dims page by page. Three originals plus softened retellings of Punamütsike,
   Kolm põrsakest, Lumivalgeke, and Tuhkatriinu. Optional narration (🔊 Loe ette)
-  plays pre-generated neural TTS audio at 0.8× speed with pitch preserved.
+  plays pre-generated neural TTS audio at 0.8× speed with pitch preserved, with
+  a narrator picker (👩 Külli / 👨 Peeter) remembered per device.
 - **Unesammud** — an 8-step bedtime routine checklist with flying-star rewards
   and a moon meter; state is per-day in localStorage, full moon celebration at
   100%, reset button to start the steps over.
@@ -36,8 +37,11 @@ Notes:
 
 ## Story narration (audio/)
 
-Each story page has a pre-generated MP3: `audio/s<story>p<page>.mp3`
-(story and page are 0-based indexes into the `STORIES` array in `index.html`).
+Each story page has a pre-generated MP3 per narrator:
+`audio/<voice>/s<story>p<page>.mp3`, where `<voice>` is `kylli` or `peeter`
+(story and page are 0-based indexes into the `STORIES` array in `index.html`;
+the voice list lives in `VOICES` in `batch_synth.py` and the `.vchip` buttons
+in `index.html` — keep them in sync).
 The reader plays the file at 0.8× with `preservesPitch`; if a file is missing it
 falls back to the device's Estonian system voice via the Web Speech API
 (on iPad that voice may need downloading: Settings → Accessibility → Spoken
@@ -90,11 +94,11 @@ Then generate (first run also downloads the HiFiGAN vocoder from HuggingFace):
 
 ```bash
 cd ../tartunlp-worker && . .venv/bin/activate
-python ../laps-magama/batch_synth.py                  # only missing clips
-python ../laps-magama/batch_synth.py --force          # redo everything
-python ../laps-magama/batch_synth.py --speaker kalev  # other voices: albert, indrek,
-                                                      # kalev, kylli, liivika, mari (default),
-                                                      # meelis, peeter, tambet, vesta
+python ../laps-magama/batch_synth.py                   # missing clips, both app voices
+python ../laps-magama/batch_synth.py --force           # redo everything
+python ../laps-magama/batch_synth.py --speaker kylli   # one voice only; the model also
+                                                       # has albert, indrek, kalev, liivika,
+                                                       # mari, meelis, tambet, vesta
 ```
 
 `batch_synth.py` parses the `STORIES` array straight out of `index.html` (so texts

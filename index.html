@@ -99,7 +99,7 @@ nav {
 nav button {
   font-family: 'Fredoka', sans-serif; font-weight: 500;
   border: 0; background: transparent; color: var(--muted);
-  padding: 9px 14px; border-radius: 19px; font-size: 12px; cursor: pointer;
+  width: 88px; padding: 9px 0; border-radius: 19px; font-size: 12px; cursor: pointer;
   display: flex; flex-direction: column; align-items: center; gap: 2px;
   transition: all .25s ease;
 }
@@ -160,6 +160,14 @@ input[type=range]::-webkit-slider-thumb {
 #stopsnd:active { transform: scale(.98); }
 
 /* ---------- stories ---------- */
+.voicerow { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 14px; }
+.vchip {
+  padding: 9px 16px; border-radius: 14px; font-size: 14px;
+  font-family: 'Fredoka', sans-serif; font-weight: 500; color: var(--muted);
+  border: 1px solid var(--card-line); background: transparent; cursor: pointer; transition: all .25s;
+}
+.vchip.on { color: var(--ink); background: linear-gradient(160deg, #ffe3a6, var(--moon-deep));
+  border-color: transparent; box-shadow: var(--glow); }
 .storycard {
   display: flex; align-items: center; gap: 16px; cursor: pointer;
   transition: transform .2s ease, border-color .2s;
@@ -265,7 +273,11 @@ input[type=range]::-webkit-slider-thumb {
         <div class="snd" data-snd="rain"><span class="big">🌧️</span><span class="nm">Vihm</span><span class="st">puuduta ja kuula</span></div>
         <div class="snd" data-snd="ocean"><span class="big">🌊</span><span class="nm">Meri</span><span class="st">puuduta ja kuula</span></div>
         <div class="snd" data-snd="wind"><span class="big">🍃</span><span class="nm">Tuulekohin</span><span class="st">puuduta ja kuula</span></div>
+        <div class="snd" data-snd="fire"><span class="big">🔥</span><span class="nm">Kaminatuli</span><span class="st">puuduta ja kuula</span></div>
+        <div class="snd" data-snd="heart"><span class="big">💗</span><span class="nm">Südamelöögid</span><span class="st">puuduta ja kuula</span></div>
+        <div class="snd" data-snd="purr"><span class="big">🐱</span><span class="nm">Kassi nurr</span><span class="st">puuduta ja kuula</span></div>
         <div class="snd" data-snd="lullaby"><span class="big">🎵</span><span class="nm">Mängutoos</span><span class="st">puuduta ja kuula</span></div>
+        <div class="snd" data-snd="twinkle"><span class="big">⭐</span><span class="nm">Tähelaul</span><span class="st">puuduta ja kuula</span></div>
       </div>
       <div class="card" style="margin-top:14px">
         <div class="mixrow"><span class="lbl">🔉</span><input type="range" id="vol" min="0" max="100" value="55"><span class="lbl">🔊</span></div>
@@ -282,7 +294,7 @@ input[type=range]::-webkit-slider-thumb {
 
     <!-- STORIES -->
     <section class="screen" id="s-stories">
-      <h2>Unejutud <small>lühikesed, iga leheküljega unisemad</small></h2>
+      <h2>Unejutud <small>iga leheküljega aina unisemad</small></h2>
       <div id="storylist"></div>
     </section>
 
@@ -310,6 +322,10 @@ input[type=range]::-webkit-slider-thumb {
 <!-- story reader -->
 <div id="reader">
   <div class="top"><button id="rclose">← Tagasi</button><div id="rdots"></div><button id="rspeak">🔇 Loe ette</button></div>
+  <div class="voicerow">
+    <button class="vchip" data-v="kylli">👩 Külli</button>
+    <button class="vchip" data-v="peeter">👨 Peeter</button>
+  </div>
   <div id="rpage"><div id="remoji"></div><div id="rtext"></div></div>
   <div id="rhint">puuduta ekraani, et lehte keerata</div>
 </div>
@@ -422,19 +438,17 @@ const Snd = {
     this.nodes.push(lfo, lg);
   },
 
-  startLullaby() {
-    // Brahms' Lullaby, music-box style. [midi, beats]
-    const tune = [
-      [64,1],[64,1],[67,2.5],[64,1],[64,1],[67,2.5],
-      [64,1],[67,1],[72,1.5],[71,.5],[69,1.5],[69,1],[67,2.5],
-      [62,1],[64,1],[65,2],[62,1],[64,1],[65,2.5],
-      [62,1],[65,1],[71,1],[69,1],[67,1],[71,1],[72,3.5],
-    ];
-    const beat = 0.62, gapLoop = 2.2;
-    // all notes go through one bus so stop() can cut already-scheduled notes
+  // a gain bus tracked in nodes, so stop() can cut already-scheduled sources
+  makeBus(gain = 1) {
     const bus = this.ctx.createGain();
+    bus.gain.value = gain;
     bus.connect(this.master);
     this.nodes.push(bus);
+    return bus;
+  },
+
+  musicBox(key, tune, beat, gapLoop) {
+    const bus = this.makeBus();
     const playNote = (midi, t, dur) => {
       const f = 440 * Math.pow(2, (midi - 69) / 12);
       [[1, 0.10], [2, 0.035]].forEach(([mult, vol]) => { // fundamental + sparkle octave
@@ -448,13 +462,88 @@ const Snd = {
       });
     };
     const schedule = () => {
-      if (this.current !== 'lullaby') return;
+      if (this.current !== key) return;
       let t = this.ctx.currentTime + 0.15;
       tune.forEach(([m, d]) => { playNote(m, t, d); t += d * beat; });
       const total = (t - this.ctx.currentTime + gapLoop) * 1000;
       this.timers.push(setTimeout(schedule, total));
     };
     schedule();
+  },
+
+  startLullaby() {
+    // Brahms' Lullaby. [midi, beats]
+    this.musicBox('lullaby', [
+      [64,1],[64,1],[67,2.5],[64,1],[64,1],[67,2.5],
+      [64,1],[67,1],[72,1.5],[71,.5],[69,1.5],[69,1],[67,2.5],
+      [62,1],[64,1],[65,2],[62,1],[64,1],[65,2.5],
+      [62,1],[65,1],[71,1],[69,1],[67,1],[71,1],[72,3.5],
+    ], 0.62, 2.2);
+  },
+
+  startTwinkle() {
+    // Twinkle Twinkle Little Star
+    this.musicBox('twinkle', [
+      [60,1],[60,1],[67,1],[67,1],[69,1],[69,1],[67,2.5],
+      [65,1],[65,1],[64,1],[64,1],[62,1],[62,1],[60,2.5],
+      [67,1],[67,1],[65,1],[65,1],[64,1],[64,1],[62,2.5],
+      [67,1],[67,1],[65,1],[65,1],[64,1],[64,1],[62,2.5],
+      [60,1],[60,1],[67,1],[67,1],[69,1],[69,1],[67,2.5],
+      [65,1],[65,1],[64,1],[64,1],[62,1],[62,1],[60,3],
+    ], 0.6, 2.2);
+  },
+
+  startHeart() {
+    const bus = this.makeBus();
+    const beat = () => {
+      if (this.current !== 'heart') return;
+      const t = this.ctx.currentTime;
+      [[0, .5], [0.28, .35]].forEach(([off, vol]) => { // lub… dub
+        const o = this.ctx.createOscillator(), g = this.ctx.createGain();
+        o.type = 'sine';
+        o.frequency.setValueAtTime(72, t + off);
+        o.frequency.exponentialRampToValueAtTime(38, t + off + 0.14);
+        g.gain.setValueAtTime(0.0001, t + off);
+        g.gain.exponentialRampToValueAtTime(vol, t + off + 0.025);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + off + 0.2);
+        o.connect(g).connect(bus);
+        o.start(t + off); o.stop(t + off + 0.3);
+      });
+      this.timers.push(setTimeout(beat, 1050)); // ~57 bpm, resting pace
+    };
+    beat();
+  },
+
+  startFire() {
+    this.loopNoise(true, 'lowpass', 350, 0.3); // warm base rumble
+    const bus = this.makeBus();
+    const white = this.noiseBuffer(false);
+    const crackle = () => {
+      if (this.current !== 'fire') return;
+      const src = this.ctx.createBufferSource();
+      src.buffer = white;
+      const f = this.ctx.createBiquadFilter();
+      f.type = 'bandpass'; f.frequency.value = 1200 + Math.random() * 3200; f.Q.value = 4;
+      const g = this.ctx.createGain();
+      const t = this.ctx.currentTime;
+      g.gain.setValueAtTime(0.06 + Math.random() * 0.12, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.04 + Math.random() * 0.06);
+      src.connect(f).connect(g).connect(bus);
+      src.start(t, Math.random() * 2, 0.12);
+      this.timers.push(setTimeout(crackle, 60 + Math.random() * 380));
+    };
+    crackle();
+  },
+
+  startPurr() {
+    const g = this.loopNoise(true, 'lowpass', 320, 0.4);
+    const purr = this.ctx.createOscillator(), pg = this.ctx.createGain();
+    purr.frequency.value = 23; pg.gain.value = 0.3; // the purr flutter
+    purr.connect(pg).connect(g.gain); purr.start();
+    const breath = this.ctx.createOscillator(), bg = this.ctx.createGain();
+    breath.frequency.value = 0.2; bg.gain.value = 0.14; // slow in-out swell
+    breath.connect(bg).connect(g.gain); breath.start();
+    this.nodes.push(purr, pg, breath, bg);
   },
 
   stop() {
@@ -476,7 +565,9 @@ const Snd = {
     if (was) return;
     this.current = name;
     ({ rain: () => this.startRain(), ocean: () => this.startOcean(),
-       wind: () => this.startWind(), lullaby: () => this.startLullaby() })[name]();
+       wind: () => this.startWind(), lullaby: () => this.startLullaby(),
+       fire: () => this.startFire(), heart: () => this.startHeart(),
+       purr: () => this.startPurr(), twinkle: () => this.startTwinkle() })[name]();
     card.classList.add('playing');
     card.querySelector('.st').textContent = 'mängib · puuduta, et peatada';
     document.getElementById('stopsnd').classList.add('show');
@@ -660,11 +751,22 @@ function speakPageTTS() {
   if (etVoice) u.voice = etVoice;
   speechSynthesis.speak(u);
 }
+let voice = localStorage.getItem('unemaa-voice') || 'kylli';
+function updateVoiceChips() {
+  document.querySelectorAll('.vchip').forEach(c => c.classList.toggle('on', c.dataset.v === voice));
+}
+document.querySelectorAll('.vchip').forEach(c => c.addEventListener('click', () => {
+  voice = c.dataset.v;
+  localStorage.setItem('unemaa-voice', voice);
+  updateVoiceChips();
+  if (speakOn) speakPage(); // re-read the page with the new narrator
+}));
+updateVoiceChips();
 function speakPage() {
   if (!speakOn) return;
   quietTTS();
   // pre-generated narration first, system voice as fallback
-  const base = `audio/s${curStory}p${curPage}`;
+  const base = `audio/${voice}/s${curStory}p${curPage}`;
   const tryPlay = exts => {
     if (!exts.length) { speakPageTTS(); return; }
     const a = new Audio(base + exts[0]);

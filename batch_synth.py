@@ -2,8 +2,10 @@
 """Batch-generate Estonian narration for Unemaa using the local TartuNLP model.
 
 Run from the TTS worker directory (see README) with its venv active:
-    cd ../tartunlp-worker && . .venv/bin/activate && python ../laps-magama/batch_synth.py [--speaker mari] [--force]
-Parses story texts out of the app's index.html and writes audio/s<story>p<page>.mp3.
+    cd ../tartunlp-worker && . .venv/bin/activate && python ../laps-magama/batch_synth.py [--speaker kylli] [--force]
+Parses story texts out of the app's index.html and writes
+audio/<voice>/s<story>p<page>.mp3 for each app voice (kylli and peeter);
+--speaker limits the run to one voice.
 """
 import io
 import os
@@ -21,7 +23,9 @@ sys.path.insert(0, os.getcwd())
 APP = pathlib.Path(__file__).resolve().parent
 OUT = APP / "audio"
 OUT.mkdir(exist_ok=True)
-SPEAKER = sys.argv[sys.argv.index("--speaker") + 1] if "--speaker" in sys.argv else "mari"
+VOICES = ["kylli", "peeter"]  # must match the .vchip options in index.html
+if "--speaker" in sys.argv:
+    VOICES = [sys.argv[sys.argv.index("--speaker") + 1]]
 FORCE = "--force" in sys.argv
 
 html = (APP / "index.html").read_text(encoding="utf-8")
@@ -32,7 +36,7 @@ stories = []
 for block in re.split(r"\{ title:", m.group(1))[1:]:
     texts = re.findall(r"\['[^']*',\s*'((?:[^'\\]|\\.)*)'\],", block)
     stories.append([t.replace("\\'", "'") for t in texts])
-print(f"{len(stories)} stories, {sum(map(len, stories))} pages, speaker={SPEAKER}")
+print(f"{len(stories)} stories, {sum(map(len, stories))} pages, voices={VOICES}")
 
 import numpy as np
 import lameenc
@@ -54,8 +58,9 @@ class _RewindingBytesIO(io.BytesIO):
 syn.io = types.SimpleNamespace(BytesIO=_RewindingBytesIO)
 
 cfg = read_model_config("config/config.yaml", "multispeaker")
-if SPEAKER not in cfg.speakers:
-    sys.exit(f"unknown speaker {SPEAKER}; options: {list(cfg.speakers)}")
+for v in VOICES:
+    if v not in cfg.speakers:
+        sys.exit(f"unknown speaker {v}; options: {list(cfg.speakers)}")
 synth = syn.Synthesizer(cfg, max_input_length=400)
 
 
@@ -70,18 +75,21 @@ def to_mp3(wav_bytes: bytes, path: pathlib.Path):
     path.write_bytes(enc.encode(pcm.tobytes()) + enc.flush())
 
 
-for si, story in enumerate(stories):
-    for pi, text in enumerate(story):
-        out = OUT / f"s{si}p{pi}.mp3"
-        marker = OUT / f".local-{out.name}"  # tracks which files are neural TTS
-        if marker.exists() and out.exists() and not FORCE:
-            print(f"{out.name}: exists, skip")
-            continue
-        resp = synth.process_request(Request(text=text, speaker=SPEAKER, speed=1.0))
-        if resp.status_code != 200 or not resp.content or not resp.content.audio:
-            sys.exit(f"{out.name}: synthesis failed (status {resp.status_code})")
-        to_mp3(resp.content.audio, out)
-        marker.touch()
-        print(f"{out.name} {out.stat().st_size // 1024}KB :: {text[:48]}")
+for voice in VOICES:
+    vdir = OUT / voice
+    vdir.mkdir(exist_ok=True)
+    for si, story in enumerate(stories):
+        for pi, text in enumerate(story):
+            out = vdir / f"s{si}p{pi}.mp3"
+            marker = vdir / f".local-{out.name}"  # tracks which files are neural TTS
+            if marker.exists() and out.exists() and not FORCE:
+                print(f"{voice}/{out.name}: exists, skip")
+                continue
+            resp = synth.process_request(Request(text=text, speaker=voice, speed=1.0))
+            if resp.status_code != 200 or not resp.content or not resp.content.audio:
+                sys.exit(f"{voice}/{out.name}: synthesis failed (status {resp.status_code})")
+            to_mp3(resp.content.audio, out)
+            marker.touch()
+            print(f"{voice}/{out.name} {out.stat().st_size // 1024}KB :: {text[:48]}")
 
 print("done")
