@@ -276,6 +276,27 @@ input[type=range]::-webkit-slider-thumb {
   0% { opacity: 1; transform: translate(0, 0) scale(1); }
   100% { opacity: 0; transform: translate(var(--dx), -110px) scale(.4) rotate(120deg); }
 }
+/* ---------- kids ---------- */
+#kidbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.kidchip {
+  display: flex; align-items: center; gap: 6px; padding: 8px 13px; border-radius: 16px;
+  background: var(--card); border: 1px solid var(--card-line); color: var(--muted);
+  font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 14.5px;
+  cursor: pointer; transition: all .25s; user-select: none; -webkit-user-select: none;
+}
+.kidchip:active { transform: scale(.96); }
+.kidchip .ke { font-size: 18px; }
+.kidchip.on { color: var(--ink); background: linear-gradient(160deg, #ffe3a6, var(--moon-deep)); border-color: var(--moon); }
+.kidchip .kedit { margin-left: 5px; font-size: 13px; opacity: .6; }
+.kidchip.kidadd { color: var(--lavender); }
+/* ---------- streak ---------- */
+#streakrow { display: flex; align-items: center; gap: 5px; margin-bottom: 18px; font-size: 18px; }
+#streakrow .wday { opacity: .85; transition: transform .3s; }
+#streakrow .wday.today { transform: scale(1.22); }
+#streakrow .streaklbl { margin-left: 8px; font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 13.5px; color: var(--moon); }
+#celebrate .cgo { background: linear-gradient(160deg, #ffe3a6, var(--moon-deep)); color: var(--ink); border-color: var(--moon); margin-top: 12px; }
+#celebrate .cgo:first-of-type { margin-top: 28px; }
+#celebrate #cclose { margin-top: 18px; }
 </style>
 </head>
 <body>
@@ -345,12 +366,14 @@ input[type=range]::-webkit-slider-thumb {
     <!-- ROUTINE -->
     <section class="screen" id="s-routine">
       <h2>Unesammud <small>tee kõik ära, et kuu täis saaks</small></h2>
+      <div id="kidbar"></div>
       <div id="moonmeter">
         <span style="font-size:22px">🌒</span>
         <div id="meterfill-wrap"><div id="meterfill"></div></div>
         <span id="meterpct">0%</span>
         <span style="font-size:22px">🌕</span>
       </div>
+      <div id="streakrow"></div>
       <div id="tasklist"></div>
       <button id="resettasks">↺ Alusta sammudega uuesti</button>
     </section>
@@ -380,6 +403,8 @@ input[type=range]::-webkit-slider-thumb {
   <div class="cmoon">🌝</div>
   <h2>Kõik tehtud, supertäht!</h2>
   <p>Iga unesamm on tehtud.<br>Kuu on täis ja sinu üle uhke.<br><b>Head ööd, maga magusasti! 💤</b></p>
+  <button id="cstory" class="cgo">📖 Loe unejuttu</button>
+  <button id="csound" class="cgo">🌧️ Pane unehelid</button>
   <button id="cclose">Sulge</button>
   <button id="creset">↺ Alusta uuesti</button>
 </div>
@@ -1055,22 +1080,202 @@ const TASKS = [
   ['🤗', 'Suur unekalli'],
   ['🌙', 'Tuled kustu, silmad kinni'],
 ];
-const todayKey = 'unemaa-' + new Date().toISOString().slice(0, 10);
-let done = JSON.parse(localStorage.getItem(todayKey) || '[]');
-const tlist = document.getElementById('tasklist');
-TASKS.forEach(([e, l], i) => {
-  const el = document.createElement('div');
-  el.className = 'task' + (done.includes(i) ? ' done' : '');
-  el.innerHTML = `<span class="te">${e}</span><span class="tl">${l}</span><span class="tc">✓</span>`;
-  el.addEventListener('click', ev => {
-    const idx = done.indexOf(i);
-    if (idx > -1) done.splice(idx, 1); else { done.push(i); flyStars(ev.clientX, ev.clientY); }
-    el.classList.toggle('done', done.includes(i));
-    localStorage.setItem(todayKey, JSON.stringify(done));
-    updateMeter();
+const todayStr = new Date().toISOString().slice(0, 10);
+
+/* ----- kids ----- */
+const KIDS_KEY = 'unemaa-kids', ACTIVE_KEY = 'unemaa-activekid';
+const KID_EMOJI = ['🦊', '🐰', '🐻', '🐯', '🦁', '🐨', '🐼', '🦄', '🐶', '🐱', '🐸', '🐧'];
+function loadKids() {
+  try { const v = JSON.parse(localStorage.getItem(KIDS_KEY)); if (Array.isArray(v) && v.length) return v; } catch (e) {}
+  return [{ id: 'k1', name: 'Mina', emoji: '🦊' }];
+}
+let kids = loadKids();
+let activeKid = localStorage.getItem(ACTIVE_KEY) || kids[0].id;
+if (!kids.some(k => k.id === activeKid)) activeKid = kids[0].id;
+const saveKids = () => localStorage.setItem(KIDS_KEY, JSON.stringify(kids));
+const saveActive = () => localStorage.setItem(ACTIVE_KEY, activeKid);
+saveKids(); saveActive(); // persist defaults so the kid list is stable from the first night
+
+/* one-time migration: old single-kid keys -> default kid namespace */
+(function migrate() {
+  if (localStorage.getItem('unemaa-migrated')) return;
+  const re = /^unemaa-\d{4}-\d{2}-\d{2}$/, keys = [];
+  for (let i = 0; i < localStorage.length; i++) keys.push(localStorage.key(i));
+  keys.filter(k => re.test(k)).forEach(k => {
+    const nk = `unemaa-${kids[0].id}-${k.slice('unemaa-'.length)}`;
+    if (!localStorage.getItem(nk)) localStorage.setItem(nk, localStorage.getItem(k));
   });
-  tlist.appendChild(el);
-});
+  localStorage.setItem('unemaa-migrated', '1');
+})();
+
+/* ----- per-kid / per-day storage ----- */
+const dayKey = (kid, ds) => `unemaa-${kid}-${ds}`;
+function dayDone(kid, ds) { try { return JSON.parse(localStorage.getItem(dayKey(kid, ds)) || '[]'); } catch (e) { return []; } }
+const dayComplete = (kid, ds) => dayDone(kid, ds).length >= TASKS.length;
+const ymd = d => d.toISOString().slice(0, 10);
+function streak(kid) {
+  let s = 0, d = new Date();
+  if (!dayComplete(kid, ymd(d))) d.setDate(d.getDate() - 1); // an unfinished today doesn't break the run yet
+  while (dayComplete(kid, ymd(d))) { s++; d.setDate(d.getDate() - 1); }
+  return s;
+}
+
+/* ----- audio feedback ----- */
+let uictx = null;
+function chime(big) {
+  try {
+    uictx = uictx || new (window.AudioContext || window.webkitAudioContext)();
+    if (uictx.state === 'suspended') uictx.resume();
+    const t = uictx.currentTime, notes = big ? [660, 880, 1175] : [660, 880];
+    notes.forEach((f, i) => {
+      const o = uictx.createOscillator(), g = uictx.createGain();
+      o.type = 'sine'; o.frequency.value = f;
+      const at = t + i * 0.09;
+      g.gain.setValueAtTime(0.0001, at);
+      g.gain.exponentialRampToValueAtTime(0.16, at + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, at + 0.4);
+      o.connect(g).connect(uictx.destination); o.start(at); o.stop(at + 0.45);
+    });
+  } catch (e) {}
+}
+function praise() {
+  const fallback = () => {
+    if (!hasTTS) return;
+    try {
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance('Tubli töö! Kõik unesammud on tehtud. Head ööd!');
+      u.lang = 'et-EE'; u.rate = 0.9; u.pitch = 1.15;
+      if (etVoice) u.voice = etVoice;
+      speechSynthesis.speak(u);
+    } catch (e) {}
+  };
+  // pre-generated neural TTS in the chosen narrator's voice; device system voice as fallback
+  try {
+    const a = new Audio(`audio/${voice}/congrats.mp3`);
+    a.preservesPitch = true; a.webkitPreservesPitch = true;
+    a.onerror = fallback;
+    a.play().catch(fallback);
+  } catch (e) { fallback(); }
+}
+
+/* ----- rendering ----- */
+const tlist = document.getElementById('tasklist');
+const kidbar = document.getElementById('kidbar');
+const streakrow = document.getElementById('streakrow');
+const meterfill = document.getElementById('meterfill');
+const meterpct = document.getElementById('meterpct');
+let done = [];
+
+function loadDone() { done = dayDone(activeKid, todayStr); }
+
+function renderTasks() {
+  tlist.innerHTML = '';
+  TASKS.forEach(([e, l], i) => {
+    const el = document.createElement('div');
+    el.className = 'task' + (done.includes(i) ? ' done' : '');
+    el.innerHTML = `<span class="te">${e}</span><span class="tl">${l}</span><span class="tc">✓</span>`;
+    el.addEventListener('click', ev => {
+      const idx = done.indexOf(i);
+      if (idx > -1) { done.splice(idx, 1); }
+      else { done.push(i); flyStars(ev.clientX, ev.clientY); chime(false); }
+      el.classList.toggle('done', done.includes(i));
+      localStorage.setItem(dayKey(activeKid, todayStr), JSON.stringify(done));
+      updateMeter(true);
+    });
+    tlist.appendChild(el);
+  });
+}
+
+function renderStreak() {
+  streakrow.innerHTML = '';
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const span = document.createElement('span');
+    span.className = 'wday' + (i === 0 ? ' today' : '');
+    span.textContent = dayComplete(activeKid, ymd(d)) ? '🌕' : '🌑';
+    streakrow.appendChild(span);
+  }
+  const s = streak(activeKid);
+  const lbl = document.createElement('span');
+  lbl.className = 'streaklbl';
+  lbl.textContent = s > 0 ? `🔥 ${s} ${s === 1 ? 'öö' : 'ööd'} järjest` : 'alusta uut seeriat';
+  streakrow.appendChild(lbl);
+}
+
+function renderKids() {
+  kidbar.innerHTML = '';
+  kids.forEach(k => {
+    const c = document.createElement('div');
+    const active = k.id === activeKid;
+    c.className = 'kidchip' + (active ? ' on' : '');
+    c.innerHTML = `<span class="ke">${k.emoji}</span>${k.name}` + (active ? '<span class="kedit" title="muuda nime">✎</span>' : '');
+    // tap a different kid to switch; tap the selected kid (or long-press any) to rename/remove
+    let lp, lpFired;
+    c.addEventListener('click', () => {
+      if (lpFired) { lpFired = false; return; }
+      if (active) kidMenu(k); else switchKid(k.id);
+    });
+    const start = () => { lpFired = false; lp = setTimeout(() => { lpFired = true; kidMenu(k); }, 600); };
+    const cancel = () => clearTimeout(lp);
+    c.addEventListener('pointerdown', start);
+    c.addEventListener('pointerup', cancel);
+    c.addEventListener('pointerleave', cancel);
+    c.addEventListener('pointermove', cancel);
+    kidbar.appendChild(c);
+  });
+  const add = document.createElement('div');
+  add.className = 'kidchip kidadd';
+  add.innerHTML = '<span class="ke">＋</span>Lisa laps';
+  add.addEventListener('click', addKid);
+  kidbar.appendChild(add);
+}
+
+function switchKid(id) {
+  activeKid = id; saveActive();
+  document.getElementById('celebrate').classList.remove('open');
+  loadDone(); renderTasks(); renderKids(); updateMeter(false);
+}
+
+function addKid() {
+  const name = (prompt('Lapse nimi?') || '').trim();
+  if (!name) return;
+  const used = kids.map(k => k.emoji);
+  const emoji = KID_EMOJI.find(e => !used.includes(e)) || '⭐';
+  const id = 'k' + Date.now().toString(36);
+  kids.push({ id, name, emoji }); saveKids();
+  switchKid(id);
+}
+
+function kidMenu(k) {
+  const v = prompt(`"${k.name}" — kirjuta uus nimi, või "kustuta" et laps eemaldada:`, k.name);
+  if (v === null) return;
+  if (v.trim().toLowerCase() === 'kustuta') {
+    if (kids.length <= 1) { alert('Vähemalt üks laps peab alles jääma.'); return; }
+    kids = kids.filter(x => x.id !== k.id); saveKids();
+    if (activeKid === k.id) switchKid(kids[0].id); else renderKids();
+  } else if (v.trim()) {
+    k.name = v.trim(); saveKids(); renderKids();
+  }
+}
+
+function updateMeter(doCelebrate) {
+  const pct = Math.round(done.length / TASKS.length * 100);
+  meterfill.style.width = pct + '%';
+  meterpct.textContent = pct + '%';
+  renderStreak();
+  if (pct === 100 && doCelebrate) {
+    chime(true); praise();
+    setTimeout(() => document.getElementById('celebrate').classList.add('open'), 650);
+  }
+}
+
+/* ----- celebration + handoff ----- */
+const closeCele = () => document.getElementById('celebrate').classList.remove('open');
+const goScreen = scr => document.querySelector(`nav button[data-scr="${scr}"]`).click();
+document.getElementById('cclose').addEventListener('click', closeCele);
+document.getElementById('cstory').addEventListener('click', () => { closeCele(); goScreen('stories'); });
+document.getElementById('csound').addEventListener('click', () => { closeCele(); goScreen('sounds'); });
+
 function flyStars(x, y) {
   for (let i = 0; i < 5; i++) {
     const s = document.createElement('div');
@@ -1080,24 +1285,17 @@ function flyStars(x, y) {
     setTimeout(() => s.remove(), 1400);
   }
 }
-function updateMeter() {
-  const pct = Math.round(done.length / TASKS.length * 100);
-  document.getElementById('meterfill').style.width = pct + '%';
-  document.getElementById('meterpct').textContent = pct + '%';
-  if (pct === 100) setTimeout(() => document.getElementById('celebrate').classList.add('open'), 650);
-}
-document.getElementById('cclose').addEventListener('click', () =>
-  document.getElementById('celebrate').classList.remove('open'));
+
 function resetTasks() {
   done = [];
-  localStorage.setItem(todayKey, '[]');
-  document.querySelectorAll('.task').forEach(t => t.classList.remove('done'));
-  document.getElementById('celebrate').classList.remove('open');
-  updateMeter();
+  localStorage.setItem(dayKey(activeKid, todayStr), '[]');
+  closeCele();
+  renderTasks(); updateMeter(false);
 }
 document.getElementById('resettasks').addEventListener('click', resetTasks);
 document.getElementById('creset').addEventListener('click', resetTasks);
-updateMeter();
+
+loadDone(); renderTasks(); renderKids(); updateMeter(false);
 </script>
 </body>
 </html>
