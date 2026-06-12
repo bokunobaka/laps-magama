@@ -5,14 +5,21 @@ One self-contained `index.html` — no build step, no framework, no server-side 
 
 ## Features
 
-- **Öised helid** — calming sounds synthesized live with the Web Audio API
-  (no audio files): rain, ocean, wind, and a music-box Brahms lullaby.
-  Volume slider and a sleep timer (15/30/45 min) that fades out over the last minute.
-- **Unejutud** — seven bedtime stories (12–13 pages each) with big calm text that
-  dims page by page. Three originals plus softened retellings of Punamütsike,
-  Kolm põrsakest, Lumivalgeke, and Tuhkatriinu. Optional narration (🔊 Loe ette)
-  plays pre-generated neural TTS audio at 0.8× speed with pitch preserved, with
-  a narrator picker (👩 Külli / 👨 Peeter) remembered per device.
+- **Öised helid** — eight calming sounds synthesized live with the Web Audio API
+  (no audio files): rain, ocean, wind, crackling fireplace, heartbeat (~57 bpm),
+  "Apache helikopter" (acoustically a cat purr — 23 Hz flutter, internally
+  `data-snd="purr"`), and two music-box tunes (Brahms' Lullaby, Twinkle Twinkle).
+  Volume slider, a stop button, and a sleep timer (15/30/45 min) that fades out
+  over the last minute.
+- **Unejutud** — ten bedtime stories (12–13 pages each) with big calm text that
+  dims page by page: originals (sleepy star, yawning forest, dream boat, police
+  car Volli, tractor Tõru) and softened classics (Punamütsike, Kolm põrsakest,
+  Lumivalgeke, Tuhkatriinu, Läbitantsitud kingad). Optional narration
+  (🔊 Loe ette) plays pre-generated neural TTS audio at 0.8× speed with pitch
+  preserved; the narrator picker (👩 Külli / 👨 Peeter) sits inside the reader,
+  is remembered per device, and re-reads the page when switched.
+- **Õhtujutt** — streams Vikerraadio's Õhtujutt bedtime-story archive live from
+  ERR (see below). Needs internet, unlike the rest of the app.
 - **Unesammud** — an 8-step bedtime routine checklist with flying-star rewards
   and a moon meter; state is per-day in localStorage, full moon celebration at
   100%, reset button to start the steps over.
@@ -121,6 +128,25 @@ option A and the TartuNLP API is sometimes down (returns 408 on every request),
 but it needs zero installation. Skips files that already exist — delete `audio/`
 (or individual files) to regenerate.
 
+## Õhtujutt tab (ERR streaming)
+
+The tab pulls episode metadata from ERR's public content API
+(`services.err.ee/api/v2/vodContent/getContentPageData?contentId=…`) and plays
+the DRM-free m4a files straight from `vod.err.ee` — both are CORS-open, so it
+all happens client-side. Details that matter if it ever breaks:
+
+- `ERR_SEED` in `index.html` is any Õhtujutt episode id; its page data carries
+  the whole series archive (`seasonList`, monthly back to 2014). The newest
+  month renders first; "Lae varasemaid jutte" fetches older months on demand.
+- Episode dates use `scheduleStart` (broadcast date) — `publicStart` is a
+  batched upload timestamp shared by several episodes.
+- The list re-fetches when the tab is opened on a new calendar day, so a
+  long-lived session on a tablet still sees new episodes.
+- Player has play/pause, seek, and persisted speed chips (0.5/0.75/0.9/1×,
+  pitch preserved). Starting an episode stops app sounds and story narration.
+- If ERR closes the API/CDN, the tab degrades to its "check your internet"
+  message; the rest of the app is unaffected.
+
 ## Editing stories / steps / sounds
 
 Everything lives in `index.html`:
@@ -129,7 +155,9 @@ Everything lives in `index.html`:
   Add a story or page, then regenerate audio (see above).
 - `TASKS` — the routine checklist `[emoji, label]` pairs.
 - `Snd` — the sound engine; each sound is a small Web Audio graph
-  (`startRain`, `startOcean`, `startWind`, `startLullaby`).
+  (`startRain`, `startOcean`, `startWind`, `startFire`, `startHeart`,
+  `startPurr`, and `musicBox()`-based `startLullaby`/`startTwinkle`).
+  New sounds need a card in `#soundgrid` plus an entry in the `toggle()` map.
 
 ## Deployment
 
