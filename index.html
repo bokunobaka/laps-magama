@@ -79,6 +79,12 @@ header h1 {
 }
 header h1 span { color: var(--moon); }
 header p { color: var(--muted); font-size: 14px; font-weight: 500; margin-top: 2px; }
+.langtoggle {
+  margin-top: 10px; padding: 5px 12px; border-radius: 12px; cursor: pointer;
+  font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 13px;
+  color: var(--muted); background: transparent; border: 1px solid var(--card-line);
+}
+.langtoggle:active { transform: scale(.97); }
 main { flex: 1; overflow-y: auto; padding: 0 20px 110px; scrollbar-width: none; }
 main::-webkit-scrollbar { display: none; }
 .screen { display: none; animation: rise .45s cubic-bezier(.2,.8,.3,1) both; }
@@ -319,20 +325,21 @@ input[type=range]::-webkit-slider-thumb {
   <main>
     <header>
       <h1>Unemaa <span>🌙</span></h1>
-      <p>aeg uniseks jääda…</p>
+      <p data-i18n="tagline">aeg uniseks jääda…</p>
+      <button id="langtoggle" class="langtoggle">🌐 English</button>
     </header>
     <!-- SOUNDS -->
     <section class="screen" id="s-sounds">
-      <h2>Öised helid <small>vali üks ja lase sel ümiseda</small></h2>
+      <h2 data-i18n="h_sounds">Öised helid <small>vali üks ja lase sel ümiseda</small></h2>
       <div id="soundgrid">
-        <div class="snd" data-snd="rain"><span class="big">🌧️</span><span class="nm">Vihm</span><span class="st">puuduta ja kuula</span></div>
-        <div class="snd" data-snd="ocean"><span class="big">🌊</span><span class="nm">Meri</span><span class="st">puuduta ja kuula</span></div>
-        <div class="snd" data-snd="wind"><span class="big">🍃</span><span class="nm">Tuulekohin</span><span class="st">puuduta ja kuula</span></div>
-        <div class="snd" data-snd="fire"><span class="big">🔥</span><span class="nm">Kaminatuli</span><span class="st">puuduta ja kuula</span></div>
-        <div class="snd" data-snd="heart"><span class="big">💗</span><span class="nm">Südamelöögid</span><span class="st">puuduta ja kuula</span></div>
-        <div class="snd" data-snd="purr"><span class="big">🚁</span><span class="nm">Apache helikopter</span><span class="st">puuduta ja kuula</span></div>
-        <div class="snd" data-snd="lullaby"><span class="big">🎵</span><span class="nm">Mängutoos</span><span class="st">puuduta ja kuula</span></div>
-        <div class="snd" data-snd="twinkle"><span class="big">⭐</span><span class="nm">Tähelaul</span><span class="st">puuduta ja kuula</span></div>
+        <div class="snd" data-snd="rain"><span class="big">🌧️</span><span class="nm" data-i18n="snd_rain">Vihm</span><span class="st">puuduta ja kuula</span></div>
+        <div class="snd" data-snd="ocean"><span class="big">🌊</span><span class="nm" data-i18n="snd_ocean">Meri</span><span class="st">puuduta ja kuula</span></div>
+        <div class="snd" data-snd="wind"><span class="big">🍃</span><span class="nm" data-i18n="snd_wind">Tuulekohin</span><span class="st">puuduta ja kuula</span></div>
+        <div class="snd" data-snd="fire"><span class="big">🔥</span><span class="nm" data-i18n="snd_fire">Kaminatuli</span><span class="st">puuduta ja kuula</span></div>
+        <div class="snd" data-snd="heart"><span class="big">💗</span><span class="nm" data-i18n="snd_heart">Südamelöögid</span><span class="st">puuduta ja kuula</span></div>
+        <div class="snd" data-snd="purr"><span class="big">🚁</span><span class="nm" data-i18n="snd_purr">Apache helikopter</span><span class="st">puuduta ja kuula</span></div>
+        <div class="snd" data-snd="lullaby"><span class="big">🎵</span><span class="nm" data-i18n="snd_lullaby">Mängutoos</span><span class="st">puuduta ja kuula</span></div>
+        <div class="snd" data-snd="twinkle"><span class="big">⭐</span><span class="nm" data-i18n="snd_twinkle">Tähelaul</span><span class="st">puuduta ja kuula</span></div>
       </div>
       <div class="card" style="margin-top:14px">
         <div class="mixrow"><span class="lbl">🔉</span><input type="range" id="vol" min="0" max="100" value="55"><span class="lbl">🔊</span></div>
@@ -343,25 +350,25 @@ input[type=range]::-webkit-slider-thumb {
           <button class="chip on" data-min="0">∞</button>
         </div>
         <div id="timerleft"></div>
-        <button id="stopsnd">⏹ Peata heli</button>
+        <button id="stopsnd" data-i18n="stopsnd">⏹ Peata heli</button>
       </div>
     </section>
 
     <!-- STORIES -->
     <section class="screen" id="s-stories">
-      <h2>Unejutud <small>iga leheküljega aina unisemad</small></h2>
+      <h2 data-i18n="h_stories">Unejutud <small>iga leheküljega aina unisemad</small></h2>
       <div id="storylist"></div>
     </section>
 
     <!-- ERR ÕHTUJUTT -->
     <section class="screen" id="s-err">
-      <h2>Õhtujutt <small>Vikerraadio unejutud otse ERR-ist · vajab internetti</small></h2>
+      <h2 data-i18n="h_err">Õhtujutt <small>Vikerraadio unejutud otse ERR-ist · vajab internetti</small></h2>
       <div class="card" id="errplayer" style="display:none">
         <div id="errnow"></div>
         <div class="errctl">
-          <button id="errback" title="10 sek tagasi">⏪︎</button>
+          <button id="errback" data-i18n-title="errback_t" title="10 sek tagasi">⏪︎</button>
           <button id="errpp">⏸︎</button>
-          <button id="errfwd" title="10 sek edasi">⏩︎</button>
+          <button id="errfwd" data-i18n-title="errfwd_t" title="10 sek edasi">⏩︎</button>
           <input type="range" id="errseek" min="0" max="1000" value="0">
           <span id="errtime">0:00</span>
         </div>
@@ -373,14 +380,14 @@ input[type=range]::-webkit-slider-thumb {
           <button class="chip" data-r="1">1×</button>
         </div>
       </div>
-      <div id="errlist"><div class="errmsg">Laen jutte…</div></div>
-      <button id="errmore" style="display:none">Lae varasemaid jutte</button>
-      <p class="errsrc">Allikas: <a href="https://lasteekraan.err.ee" target="_blank" rel="noopener">ERR Lasteekraan</a> · Vikerraadio</p>
+      <div id="errlist"><div class="errmsg" data-i18n="errLoading">Laen jutte…</div></div>
+      <button id="errmore" style="display:none" data-i18n="errmore">Lae varasemaid jutte</button>
+      <p class="errsrc" data-i18n="errsrc">Allikas: <a href="https://lasteekraan.err.ee" target="_blank" rel="noopener">ERR Lasteekraan</a> · Vikerraadio</p>
     </section>
 
     <!-- ROUTINE -->
     <section class="screen active" id="s-routine">
-      <h2>Unesammud <small>tee kõik ära, et kuu täis saaks</small></h2>
+      <h2 data-i18n="h_routine">Unesammud <small>tee kõik ära, et kuu täis saaks</small></h2>
       <div id="kidbar"></div>
       <div id="moonmeter">
         <span style="font-size:22px">🌒</span>
@@ -390,41 +397,126 @@ input[type=range]::-webkit-slider-thumb {
       </div>
       <div id="streakrow"></div>
       <div id="tasklist"></div>
-      <button id="resettasks">↺ Alusta sammudega uuesti</button>
+      <button id="resettasks" data-i18n="reset">↺ Alusta sammudega uuesti</button>
     </section>
   </main>
 
   <nav>
-    <button class="on" data-scr="routine"><span class="ico">⭐</span>Sammud</button>
-    <button data-scr="stories"><span class="ico">📖</span>Jutud</button>
-    <button data-scr="err"><span class="ico">📻</span>Õhtujutt</button>
-    <button data-scr="sounds"><span class="ico">🌧️</span>Helid</button>
+    <button class="on" data-scr="routine"><span class="ico">⭐</span><span data-i18n="nav_routine">Sammud</span></button>
+    <button data-scr="stories"><span class="ico">📖</span><span data-i18n="nav_stories">Jutud</span></button>
+    <button data-scr="err"><span class="ico">📻</span><span data-i18n="nav_err">Õhtujutt</span></button>
+    <button data-scr="sounds"><span class="ico">🌧️</span><span data-i18n="nav_sounds">Helid</span></button>
   </nav>
 </div>
 
 <!-- story reader -->
 <div id="reader">
-  <div class="top"><button id="rclose">← Tagasi</button><div id="rdots"></div><button id="rspeak">🔇 Loe ette</button></div>
+  <div class="top"><button id="rclose" data-i18n="rclose">← Tagasi</button><div id="rdots"></div><button id="rspeak">🔇 Loe ette</button></div>
   <div class="voicerow">
     <button class="vchip" data-v="kylli">👩 Külli</button>
     <button class="vchip" data-v="peeter">👨 Peeter</button>
   </div>
   <div id="rpage"><div id="remoji"></div><div id="rtext"></div></div>
-  <div id="rhint">puuduta ekraani, et lehte keerata</div>
+  <div id="rhint" data-i18n="hintTurn">puuduta ekraani, et lehte keerata</div>
 </div>
 
 <!-- routine celebration -->
 <div id="celebrate">
   <div class="cmoon">🌝</div>
-  <h2>Kõik tehtud, supertäht!</h2>
-  <p>Iga unesamm on tehtud.<br>Kuu on täis ja sinu üle uhke.<br><b>Head ööd, maga magusasti! 💤</b></p>
-  <button id="cstory" class="cgo">📖 Loe unejuttu</button>
-  <button id="csound" class="cgo">🌧️ Pane unehelid</button>
-  <button id="cclose">Sulge</button>
-  <button id="creset">↺ Alusta uuesti</button>
+  <h2 data-i18n="cele_h">Kõik tehtud, supertäht!</h2>
+  <p data-i18n="cele_p">Iga unesamm on tehtud.<br>Kuu on täis ja sinu üle uhke.<br><b>Head ööd, maga magusasti! 💤</b></p>
+  <button id="cstory" class="cgo" data-i18n="cstory">📖 Loe unejuttu</button>
+  <button id="csound" class="cgo" data-i18n="csound">🌧️ Pane unehelid</button>
+  <button id="cclose" data-i18n="cclose">Sulge</button>
+  <button id="creset" data-i18n="creset">↺ Alusta uuesti</button>
 </div>
 
 <script>
+/* ================= language (i18n) ================= */
+let L = localStorage.getItem('unemaa-lang') === 'en' ? 'en' : 'et';
+const STR = {
+  et: {
+    title: 'Unemaa · Head ööd',
+    tagline: 'aeg uniseks jääda…',
+    switchLabel: '🌐 English',
+    h_sounds: 'Öised helid <small>vali üks ja lase sel ümiseda</small>',
+    h_stories: 'Unejutud <small>iga leheküljega aina unisemad</small>',
+    h_err: 'Õhtujutt <small>Vikerraadio unejutud otse ERR-ist · vajab internetti</small>',
+    h_routine: 'Unesammud <small>tee kõik ära, et kuu täis saaks</small>',
+    snd_rain: 'Vihm', snd_ocean: 'Meri', snd_wind: 'Tuulekohin', snd_fire: 'Kaminatuli',
+    snd_heart: 'Südamelöögid', snd_purr: 'Apache helikopter', snd_lullaby: 'Mängutoos', snd_twinkle: 'Tähelaul',
+    sndTap: 'puuduta ja kuula', sndPlaying: 'mängib · puuduta, et peatada',
+    stopsnd: '⏹ Peata heli',
+    fadePre: '🌙 vaibub ', fadePost: ' pärast',
+    nav_routine: 'Sammud', nav_stories: 'Jutud', nav_err: 'Õhtujutt', nav_sounds: 'Helid',
+    reset: '↺ Alusta sammudega uuesti',
+    rclose: '← Tagasi',
+    errback_t: '10 sek tagasi', errfwd_t: '10 sek edasi',
+    errLoading: 'Laen jutte…',
+    errmore: 'Lae varasemaid jutte',
+    errsrc: 'Allikas: <a href="https://lasteekraan.err.ee" target="_blank" rel="noopener">ERR Lasteekraan</a> · Vikerraadio',
+    errFail: 'Juttude laadimine ebaõnnestus 😴<br>Kontrolli internetiühendust ja proovi uuesti.',
+    cele_h: 'Kõik tehtud, supertäht!',
+    cele_p: 'Iga unesamm on tehtud.<br>Kuu on täis ja sinu üle uhke.<br><b>Head ööd, maga magusasti! 💤</b>',
+    cstory: '📖 Loe unejuttu', csound: '🌧️ Pane unehelid', cclose: 'Sulge', creset: '↺ Alusta uuesti',
+    speakOn: '🔊 Loeb ette', speakOff: '🔇 Loe ette',
+    pageWord: 'lehekülge',
+    hintEnd: 'lõpp 🌙 puuduta, et sulgeda', hintTurn: 'puuduta ekraani, et lehte keerata',
+    praise: 'Tubli töö! Kõik unesammud on tehtud. Head ööd!',
+    skipNo: 'täna ei', skipYes: 'täna ikka',
+    streakPre: '🔥 ', streakPost: ' järjest', streakUnit1: 'öö', streakUnitN: 'ööd', streakStart: 'alusta uut seeriat',
+    tasks: ['Korista mänguasjad ära', 'Pissile ja potile', 'Vanni ja pesule', 'Pese hambad puhtaks',
+      'Pidžaama selga', 'Lonks vett', 'Üks unejutt', 'Suur unekalli', 'Tuled kustu, silmad kinni'],
+    kidDefault: 'Mina',
+    kidNamePrompt: 'Lapse nimi?',
+    kidMin: 'Vähemalt üks laps peab alles jääma.',
+    kidMenu: k => `"${k}" — kirjuta uus nimi, või "kustuta" et laps eemaldada:`,
+    kidDeleteKw: 'kustuta',
+    showsTTS: 'et-EE',
+  },
+  en: {
+    title: 'Unemaa · Good night',
+    tagline: 'time to get sleepy…',
+    switchLabel: '🌐 Eesti',
+    h_sounds: 'Night sounds <small>pick one and let it hum</small>',
+    h_stories: 'Bedtime stories <small>sleepier with every page</small>',
+    h_err: 'Evening tale <small>Vikerraadio bedtime stories from ERR · needs internet</small>',
+    h_routine: 'Bedtime steps <small>do them all to fill the moon</small>',
+    snd_rain: 'Rain', snd_ocean: 'Ocean', snd_wind: 'Wind', snd_fire: 'Fireplace',
+    snd_heart: 'Heartbeat', snd_purr: 'Apache helicopter', snd_lullaby: 'Music box', snd_twinkle: 'Star song',
+    sndTap: 'tap and listen', sndPlaying: 'playing · tap to stop',
+    stopsnd: '⏹ Stop sound',
+    fadePre: '🌙 fades in ', fadePost: '',
+    nav_routine: 'Steps', nav_stories: 'Stories', nav_err: 'Evening tale', nav_sounds: 'Sounds',
+    reset: '↺ Start the steps again',
+    rclose: '← Back',
+    errback_t: 'back 10 sec', errfwd_t: 'forward 10 sec',
+    errLoading: 'Loading tales…',
+    errmore: 'Load older tales',
+    errsrc: 'Source: <a href="https://lasteekraan.err.ee" target="_blank" rel="noopener">ERR Lasteekraan</a> · Vikerraadio (in Estonian)',
+    errFail: 'Could not load the tales 😴<br>Check your internet connection and try again.',
+    cele_h: 'All done, superstar!',
+    cele_p: 'Every bedtime step is finished.<br>The moon is full and proud of you.<br><b>Good night, sleep sweetly! 💤</b>',
+    cstory: '📖 Read a story', csound: '🌧️ Play sleep sounds', cclose: 'Close', creset: '↺ Start again',
+    speakOn: '🔊 Reading aloud', speakOff: '🔇 Read aloud',
+    pageWord: 'pages',
+    hintEnd: 'the end 🌙 tap to close', hintTurn: 'tap the screen to turn the page',
+    praise: 'Great job! All your bedtime steps are done. Good night!',
+    skipNo: 'not today', skipYes: 'today after all',
+    streakPre: '🔥 ', streakPost: ' in a row', streakUnit1: 'night', streakUnitN: 'nights', streakStart: 'start a new streak',
+    tasks: ['Tidy up the toys', 'Potty time', 'Bath and wash', 'Brush your teeth',
+      'Pajamas on', 'A sip of water', 'One bedtime story', 'A big goodnight hug', 'Lights off, eyes closed'],
+    kidDefault: 'Me',
+    kidNamePrompt: "Child's name?",
+    kidMin: 'At least one child must stay.',
+    kidMenu: k => `"${k}" — type a new name, or "delete" to remove the child:`,
+    kidDeleteKw: 'delete',
+    showsTTS: 'en-US',
+  },
+};
+let T = STR[L];
+/* applyLang() is defined after the render helpers it calls; see below */
+
 /* ================= stars & clouds ================= */
 (function makeSky() {
   const sky = document.getElementById('sky');
@@ -638,7 +730,7 @@ const Snd = {
     this.nodes = [];
     this.current = null;
     document.querySelectorAll('.snd').forEach(c => {
-      c.classList.remove('playing'); c.querySelector('.st').textContent = 'puuduta ja kuula';
+      c.classList.remove('playing'); c.querySelector('.st').textContent = T.sndTap;
     });
     document.getElementById('stopsnd').classList.remove('show');
   },
@@ -655,7 +747,7 @@ const Snd = {
        fire: () => this.startFire(), heart: () => this.startHeart(),
        purr: () => this.startPurr(), twinkle: () => this.startTwinkle() })[name]();
     card.classList.add('playing');
-    card.querySelector('.st').textContent = 'mängib · puuduta, et peatada';
+    card.querySelector('.st').textContent = T.sndPlaying;
     document.getElementById('stopsnd').classList.add('show');
     this.armTimer();
   },
@@ -685,7 +777,7 @@ const Snd = {
       const left = this.timerEnd - Date.now();
       if (left <= 0 || !this.current) { clearInterval(this.tickInt); document.getElementById('timerleft').textContent = ''; return; }
       const m = Math.floor(left / 60000), s = Math.floor(left % 60000 / 1000);
-      document.getElementById('timerleft').textContent = `🌙 vaibub ${m}:${String(s).padStart(2, '0')} pärast`;
+      document.getElementById('timerleft').textContent = `${T.fadePre}${m}:${String(s).padStart(2, '0')}${T.fadePost}`;
     };
     tick(); this.tickInt = setInterval(tick, 1000);
   }
@@ -848,14 +940,173 @@ const STORIES = [
     ['💤', 'Sõdur võttis vanima printsessi naiseks ja peeti rõõmsad pulmad. Ja printsessid? Nemad magasid nüüd öösiti sügavalt ja magusalt — nagu sina varsti. Head ööd, väike tantsija.'],
   ]},
 ];
+/* English narration text, same order/length as STORIES; emojis are shared */
+const STORIES_EN = [
+  { title: 'The Sleepy Little Star', sub: 'a star learns to rest', pages: [
+    'High in the velvet sky, right beside the Moon, lived a little star named Twinkle. She was the smallest star in the whole sky.',
+    'Every evening, when children went to bed, Twinkle lit up her shine. She sparkled and spun and giggled with joy.',
+    "Twinkle's best friend was a little comet named Whoosh. Together they played tag across the sky, their tails streaming long behind them.",
+    'But tonight Twinkle felt something strange. A big, slow yawn was coming. Aaaah… Her eyes grew heavy.',
+    '"Little star," whispered the Moon in a gentle voice, "you have shone so brightly all night long. Even stars must rest sometimes."',
+    '"But who will give the children light?" asked Twinkle, worried. "I will keep watch," smiled the Moon. "You go and rest."',
+    'So Twinkle searched for the fluffiest, softest cloud in the whole sky. It was white and tender, just like a marshmallow.',
+    'Twinkle snuggled into the cloud and pulled a wisp of it up to her chin. The cloud was warm and smelled faintly of summer rain.',
+    'Far away the other stars hummed a quiet lullaby. Whoosh waved good night and drew one last sparkling arc across the sky.',
+    "Twinkle's shine grew softer… and softer… and slower. Her eyes drifted gently shut.",
+    'The Moon covered her with a silver blanket of light and kept watch over her. The whole sky grew quiet and calm.',
+    'And the little star fell deeply, deeply asleep. Just like you now. Good night, little star. Good night, dear child.',
+  ]},
+  { title: "The Bear's Big Yawn", sub: 'a yawn that travelled the forest', pages: [
+    'Deep in the quiet forest, under a tall spruce, lived a Bear. He had spent all day looking for honey and picking berries.',
+    'The sun began to set and painted the sky pink. "My, am I tired," the Bear mumbled to himself.',
+    'And then it happened. The Bear yawned one enormous yawn. It was so big that the birds in the tree wobbled on their branch.',
+    'The yawn floated over the forest to Rabbit, who was nibbling a carrot. Rabbit yawned too. "Oh my," he said in a sleepy voice.',
+    'From there the yawn drifted to Fox. Fox yawned the fluffiest yawn of all — even his tail went fluffy.',
+    'Little Hedgehog yawned so sweetly under his prickles that the spines rustled. He curled right up in the soft leaves.',
+    'The deer family yawned all together, all at once. The fawns nestled in under their mother\'s warm side to sleep.',
+    'Even Owl, who loves the night the most, slowly blinked his big eyes… and yawned. "Whoo… so sleepy."',
+    'Little by little the whole forest grew cozy. The leaves settled to sleep on the trees and the wind sang a quiet cradle song.',
+    'The Moon rose above the trees and drew a soft silver blanket over everyone. The forest shimmered gently.',
+    'The Bear curled up in his den, warm as fresh bread. His heart beat slowly and calmly. Thump… thump…',
+    'Hush now… the whole forest is sleeping. Rabbit sleeps, Fox sleeps, Bear sleeps. Time for you to join them too. Good night.',
+  ]},
+  { title: 'The Dream Boat', sub: 'a gentle sail to dreamland', pages: [
+    'At the end of every day, when the sky turns deep blue, a little silver boat comes sailing. It is the Dream Boat.',
+    'The boat rocks gently on a sea made of pure starlight. The waves lap softly: lap… lap… lap…',
+    'Your teddy bear climbs aboard first. He finds the comfiest spot and pats the place beside him — that one is for you.',
+    "You lie down on a pillow as soft as a marshmallow cloud. The blanket is light as a butterfly's wing and warm as a sunbeam.",
+    "Sleepy dolphins swim beside the boat and hum a quiet song. Their song sounds like your mother's voice as she rocks you gently.",
+    "Beneath the water swim little fish carrying lanterns. They light the boat's way through the soft, warm night.",
+    'The boat sails past the Dream Lighthouse. It blinks at you kindly: one, two, three… sleep well, sleep well.',
+    'In the distance the Dream Island appears. There grow trees, and on them hang the loveliest dreams, like ripe apples.',
+    'You may pick any dream you like. Maybe one about flying? Or a land of sweets? Or friends to play with?',
+    'The Moon lights the way and smiles its gentlest smile. "Welcome," it whispers. "I have been waiting for you."',
+    'The boat sways softly to and fro, to and fro. Your eyelids grow heavy. Teddy is already asleep beside you.',
+    'Close your eyes… the boat knows the way. It will carry you to the loveliest dream. Sweet dreams, dear child.',
+  ]},
+  { title: 'Little Red Riding Hood', sub: 'a girl, a wolf and grandmother', pages: [
+    'Once upon a time there was a little girl who always wore a red velvet hood. So everyone called her Little Red Riding Hood.',
+    'One morning her mother said, "Grandmother is ill. Take her this basket — here are cakes, jam, and warm tea."',
+    '"Go straight along the forest path to Grandmother\'s house," her mother said. "And don\'t chatter too long with strangers."',
+    'The forest was lovely. Birds sang, the sun shone through the branches, and flowers grew by the path. Red picked a little bunch.',
+    'Suddenly the Wolf stepped in front of her. "Hello, little girl," he said smoothly. "Where are you going with such a fine basket?"',
+    "\"To Grandmother's,\" answered Red. The sly wolf grinned and dashed through the forest by a shortcut toward Grandmother's house.",
+    "The wolf got there first, climbed into Grandmother's bed, and pulled on her bonnet. Luckily Grandmother had hidden in the cupboard.",
+    'Red came inside and wondered, "Grandmother, why are your ears so big?" — "The better to hear you with," answered the wolf.',
+    '"But why are your eyes so big?" — "The better to see you with." — "And why is your mouth so big?" The wolf was just about to answer…',
+    '…when the door flew open! In came a clever huntsman who had seen it all through the window. "Off to the woods, Wolf, and don\'t come back!"',
+    'The wolf leapt out of bed and ran far into the forest with his tail between his legs. From that day on he never troubled anyone again.',
+    "Grandmother came out of the cupboard and hugged Red tightly. Together they drank warm tea and ate Mother's home-baked cakes.",
+    'In the evening the huntsman took Red safely home. Mother tucked her into a warm bed. All was well. Good night.',
+  ]},
+  { title: 'The Three Little Pigs', sub: 'three houses and one wolf', pages: [
+    'Once there were three little pigs: Niff, Nuff and Naff. One spring they decided to build houses of their very own.',
+    'Niff was the most impatient. He built his house of straw, because it was quick. "Done!" he cheered, and ran off chasing butterflies.',
+    'Nuff built his house of sticks and boards. For a while he tapped with his hammer: knock-knock-knock. Then he went off to play too.',
+    'But Naff carefully laid stone upon stone. His brothers laughed: "You build so slowly!" But Naff replied, "A strong house is worth the work."',
+    'One evening a hungry wolf came out of the forest. He knocked on the straw house: "Little pig, let me in!" — "Never!" squeaked Niff.',
+    '"Then I\'ll huff and I\'ll puff and I\'ll blow your house down!" The wolf took a deep breath: whoosh and puff! The straw flew everywhere.',
+    "Niff ran squealing to his brother's stick house. But the wolf came after him and blew again: whoosh and puff and PUFF! The sticks scattered.",
+    'The two little pigs raced to Naff\'s stone house. Naff locked the door and slid the bolt across. "Here we are safe," he said calmly.',
+    'The wolf huffed and puffed and puffed until his face went red. But the stone house did not budge. Not one single stone wobbled.',
+    'The wolf even tried to climb onto the roof, but slipped down the smooth stone and landed in soft moss. "That\'s quite enough!" he groaned.',
+    'The tired wolf limped home to the forest and fell asleep right there on the moss. He decided that tomorrow he would eat strawberries instead.',
+    'The three little pigs sat by the fire in the stone house and drank warm cocoa. "In spring we\'ll build you stone houses too," Naff promised.',
+    'Then the three tired pigs crawled into one big soft bed and fell sweetly asleep. Good night, little pigs.',
+  ]},
+  { title: 'Snow White', sub: 'an apple and seven dwarfs', pages: [
+    'Once there was a princess whose hair was black as night and skin as white as fresh snow. Her name was Snow White.',
+    'In the castle also lived a proud queen who had a magic mirror. "Mirror, mirror on the wall, who is the fairest of them all?"',
+    '"Snow White," answered the mirror honestly. The queen grew so angry that Snow White decided to leave the castle altogether.',
+    'She walked through a great forest until she came to a dear little cottage. The door was open, and inside stood seven tiny beds.',
+    'Seven dwarfs lived in the house, who dug for jewels inside the mountain. When they came home that evening, they found the sleeping princess.',
+    '"Stay and live with us," the dwarfs begged. So Snow White stayed. She cooked soup, sang songs, and the house was full of joy.',
+    'But one day, while the dwarfs were at work, a strange old woman came to the door. She offered Snow White a red apple.',
+    'Snow White bit the apple — and at once fell into a deep magic sleep. It was the jealous queen\'s wicked trick.',
+    'The dwarfs watched over her night and day. They covered her with a warm blanket and kept a candle burning. They cared for her dearly.',
+    'Then a kind prince rode through the forest. He saw the beautiful sleeping princess and gave her a gentle kiss on the cheek.',
+    'The spell broke! Snow White opened her eyes and smiled. The dwarfs jumped so high for joy that their caps flew off their heads.',
+    'They held a great feast and all lived happily ever after. And now, dear child, close your eyes like Snow White. Good night.',
+  ]},
+  { title: 'Cinderella', sub: 'a glass slipper and the midnight bell', pages: [
+    'Once there was a kind-hearted girl who had to clean and wash dishes from morning till night. They called her Cinderella.',
+    'One day a letter came from the castle: the king invited everyone in the kingdom to a grand ball. The prince was looking for a bride.',
+    '"You stay home," said the stepsisters as they put on fine gowns and drove away. Cinderella sat sadly by the hearth.',
+    'Suddenly a bright light flashed — a good fairy appeared before her. "Don\'t cry, dear. You shall go to the ball too!"',
+    'The fairy waved her wand. A big pumpkin became a golden carriage, and six little mice became white horses.',
+    "One more magic word — and Cinderella's old dress turned into a sparkling ball gown. On her feet appeared beautiful glass slippers.",
+    '"One more thing," said the fairy seriously. "When the clock strikes twelve, the magic will end. You must be home by then!"',
+    'At the ball no one could take their eyes off Cinderella. The prince asked her to dance and danced with her all evening. They laughed together.',
+    'Suddenly the great clock began to strike: bong, bong, bong! Midnight! Cinderella ran down the stairs as fast as her feet could carry her.',
+    'In her hurry she left one glass slipper on the steps. The carriage turned back into a pumpkin, but Cinderella reached home just in time.',
+    '"I will try the slipper on every girl," the prince promised, and searched the whole kingdom for its owner.',
+    "At last he came to Cinderella's house. The slipper fit perfectly! The prince knew his dance partner at once and asked for her hand.",
+    'They held a wonderful wedding, and Cinderella never had to clean alone again. They lived happily ever after. Sleep sweetly too.',
+  ]},
+  { title: 'Volli the Police Car', sub: "a little police car's workday", pages: [
+    'In the town lived a little police car named Volli. He had bright blue lights and the cheeriest beep in the whole town.',
+    "Volli's best friend was Officer Paul. Every morning Paul said, \"Good morning, Volli! Let's go see if anyone needs help.\"",
+    'First they saw a mother duck with her ducklings who wanted to cross the road. Volli flashed his lights and all the cars stopped nicely.',
+    'The ducklings waddled across one after another: peep-pop, peep-pop. "Thank you so much!" quacked the mother duck.',
+    'Then a little girl called: her teddy bear had got lost in the park. Volli and Paul set off to search at once.',
+    'They looked under the slide and by the swings. At last Paul found the bear asleep under a bench. "You really know how to hide!"',
+    'The girl hugged her bear and waved: "Thank you, Volli! Thank you, Paul!" Volli beeped happily twice.',
+    'In the afternoon they also helped an old man\'s puppy find its way home and showed a lost bus the right road.',
+    'The sun began to set. "We did so many good deeds today," said Paul, and patted Volli\'s hood.',
+    'The town grew quiet little by little. Windows lit up warmly and children climbed into bed. All was calm and safe.',
+    'Volli rolled slowly into his garage. Paul covered him with a warm blanket and whispered, "Good night, good friend."',
+    'Volli switched off his lights, closed his headlight eyes, and fell sweetly asleep. New good deeds wait tomorrow. Good night.',
+  ]},
+  { title: 'Tõru the Tractor', sub: "a good tractor's long day", pages: [
+    'On the farm lived a big red tractor named Tõru. Every morning he woke to the rooster\'s call: cock-a-doodle-doo!',
+    'Tõru shook the dewdrops off his hood and rumbled happily to life: brrr-brrr-brrr. A long workday lay ahead.',
+    'First Tõru ploughed the big field. The soil was soft and smelled good. The furrows lay straight as if drawn with a ruler.',
+    '"Grow big," Tõru mumbled as he sowed the grain. "We\'ll come back for you in the autumn."',
+    'At midday Tõru hauled fresh hay to the cows. The cows mooed gratefully: moo, moo!',
+    "The sheep got their share too. The smallest lamb rubbed against Tõru's big wheel — that was its way of giving a hug.",
+    'In the afternoon Tõru helped the farmer haul a woodpile. The load was heavy, but Tõru was strong: brrr-brrr, we\'ll manage!',
+    'Toward evening Tõru carried the last load of hay bales into the barn. The sunflowers nodded to him by the fence.',
+    'The sun sank behind the forest and painted the sky gold. Tõru\'s engine was tired and warm. The workday was done.',
+    'Tõru rolled slowly toward the barn. The hens were already on their perch and Muki the dog yawned in his kennel.',
+    'The barn was dark and peaceful. The hay smelled sweet. Tõru parked in his spot and sighed contentedly.',
+    'His engine ticked softly as it cooled: tick… tick… tick. Tõru\'s eyes drifted shut. Good night, good tractor. Good night to you too.',
+  ]},
+  { title: 'The Worn-Out Dancing Shoes', sub: 'twelve dancing princesses', pages: [
+    'Once there was a king who had twelve daughters, each lovelier than the last. They all slept in one big room with twelve beds.',
+    'Every evening the king carefully locked the bedroom door. But strange to say — every morning the princesses\' shoes were danced to shreds!',
+    '"Whoever discovers where my daughters dance at night," declared the king, "shall be heir to the kingdom!" Many princes tried to keep watch, but always fell asleep, and the secret stayed a secret.',
+    'One day an old soldier came to the town. On the way he met a kind old woman, who asked, "Where are you going, soldier?" — "To try to solve the king\'s riddle."',
+    '"Then take this good advice," said the old woman. "Don\'t drink a drop of wine in the evening. And take this cloak — when you put it on, you turn invisible!"',
+    'That evening in the castle the eldest princess brought the soldier a goblet of wine. The soldier pretended to drink but swallowed nothing. Then he lay down and snored loudly: snore… snore…',
+    'The princesses giggled: "He sleeps like a log!" They put on their finest dresses. Then the eldest sister knocked on her bed — and a secret stair opened under the floor!',
+    'The princesses hurried down the stairs. The soldier pulled on the magic cloak, turned invisible, and crept after them on tiptoe. The youngest sister whispered, "Something is different tonight…" But the others only laughed.',
+    'Below waited a wondrous forest with trees of silver leaves. The soldier broke off one leaf as proof — snap! "Did you hear that?" gasped the youngest. "It was only the wind," said the eldest.',
+    'Next came a forest where the leaves were pure gold. The soldier broke a leaf there too. Then they reached a lake, where twelve boats and twelve princes were waiting.',
+    'Across the water glittered a beautiful lit-up castle. There the princesses danced all night, until their shoes were in shreds again. The invisible soldier saw it all.',
+    'In the morning the king asked, "Well, soldier, do you know where my daughters go?" — "I do!" And the soldier showed the silver and golden leaves. The princesses had to confess everything.',
+    'The soldier took the eldest princess for his wife and a joyful wedding was held. And the princesses? They now slept deeply and sweetly at night — just as you soon will. Good night, little dancer.',
+  ]},
+];
+
+/* ----- story accessors (English text lives in STORIES_EN, emojis stay shared) ----- */
+const stLen = i => STORIES[i].pages.length;
+const stEmoji = (i, p) => STORIES[i].pages[p][0];
+const stTitle = i => (L === 'en' ? STORIES_EN[i].title : STORIES[i].title);
+const stSub = i => (L === 'en' ? STORIES_EN[i].sub : STORIES[i].sub);
+const stText = (i, p) => (L === 'en' ? STORIES_EN[i].pages[p] : STORIES[i].pages[p][1]);
+
 const list = document.getElementById('storylist');
-STORIES.forEach((st, i) => {
-  const el = document.createElement('div');
-  el.className = 'card storycard';
-  el.innerHTML = `<div class="cover">${st.cover}</div><div><h3>${st.title}</h3><p>${st.sub} · ${st.pages.length} lehekülge</p></div>`;
-  el.addEventListener('click', () => openStory(i));
-  list.appendChild(el);
-});
+function renderStoryList() {
+  list.innerHTML = '';
+  STORIES.forEach((st, i) => {
+    const el = document.createElement('div');
+    el.className = 'card storycard';
+    el.innerHTML = `<div class="cover">${st.cover}</div><div><h3>${stTitle(i)}</h3><p>${stSub(i)} · ${stLen(i)} ${T.pageWord}</p></div>`;
+    el.addEventListener('click', () => openStory(i));
+    list.appendChild(el);
+  });
+}
+renderStoryList();
 const reader = document.getElementById('reader');
 let curStory = 0, curPage = 0;
 
@@ -863,21 +1114,24 @@ let curStory = 0, curPage = 0;
 const rspeak = document.getElementById('rspeak');
 const hasTTS = 'speechSynthesis' in window;
 let speakOn = localStorage.getItem('unemaa-speak') === '1';
-let etVoice = null, narrator = null;
+let etVoice = null, enVoice = null, narrator = null;
 function pickVoice() {
   const vs = speechSynthesis.getVoices();
   etVoice = vs.find(v => v.lang.toLowerCase().startsWith('et')) || null;
+  enVoice = vs.find(v => v.lang.toLowerCase().startsWith('en')) || null;
 }
+const langVoice = () => (L === 'en' ? enVoice : etVoice);
 if (hasTTS) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
 function updateSpeakBtn() {
   rspeak.classList.toggle('on', speakOn);
-  rspeak.textContent = speakOn ? '🔊 Loeb ette' : '🔇 Loe ette';
+  rspeak.textContent = speakOn ? T.speakOn : T.speakOff;
 }
 function speakPageTTS() {
   if (!hasTTS) return;
-  const u = new SpeechSynthesisUtterance(STORIES[curStory].pages[curPage][1]);
-  u.lang = 'et-EE'; u.rate = 0.85; u.pitch = 1.05;
-  if (etVoice) u.voice = etVoice;
+  const u = new SpeechSynthesisUtterance(stText(curStory, curPage));
+  u.lang = T.showsTTS; u.rate = 0.85; u.pitch = 1.05;
+  const lv = langVoice();
+  if (lv) u.voice = lv;
   speechSynthesis.speak(u);
 }
 let voice = localStorage.getItem('unemaa-voice') || 'kylli';
@@ -894,7 +1148,9 @@ updateVoiceChips();
 function speakPage() {
   if (!speakOn) return;
   quietTTS();
-  // pre-generated narration first, system voice as fallback
+  // English has no pre-generated narration — use the device speech synthesizer
+  if (L === 'en') { speakPageTTS(); return; }
+  // Estonian: pre-generated neural narration first, system voice as fallback
   const base = `audio/${voice}/s${curStory}p${curPage}`;
   const tryPlay = exts => {
     if (!exts.length) { speakPageTTS(); return; }
@@ -932,21 +1188,20 @@ function openStory(i) {
   showPage();
 }
 function showPage() {
-  const st = STORIES[curStory], pg = st.pages[curPage];
+  const last = stLen(curStory) - 1;
   const txt = document.getElementById('rtext');
-  document.getElementById('remoji').textContent = pg[0];
-  txt.textContent = pg[1];
+  document.getElementById('remoji').textContent = stEmoji(curStory, curPage);
+  txt.textContent = stText(curStory, curPage);
   txt.style.animation = 'none'; void txt.offsetWidth; txt.style.animation = '';
   // get dimmer + sleepier as the story goes on
-  const prog = curPage / (st.pages.length - 1);
+  const prog = curPage / last;
   document.getElementById('rpage').style.opacity = 1 - prog * 0.25;
   document.getElementById('rdots').querySelectorAll('i').forEach((d, j) => d.classList.toggle('done', j <= curPage));
-  document.getElementById('rhint').textContent =
-    curPage === st.pages.length - 1 ? 'lõpp 🌙 puuduta, et sulgeda' : 'puuduta ekraani, et lehte keerata';
+  document.getElementById('rhint').textContent = curPage === last ? T.hintEnd : T.hintTurn;
   speakPage();
 }
 document.getElementById('rpage').addEventListener('click', () => {
-  if (curPage < STORIES[curStory].pages.length - 1) { curPage++; showPage(); }
+  if (curPage < stLen(curStory) - 1) { curPage++; showPage(); }
   else { reader.classList.remove('open'); quietTTS(); }
 });
 document.getElementById('rclose').addEventListener('click', () => { reader.classList.remove('open'); quietTTS(); });
@@ -1002,7 +1257,7 @@ async function errInit() {
     errSt.day = today;
   } catch (e) {
     document.getElementById('errlist').innerHTML =
-      '<div class="errmsg">Juttude laadimine ebaõnnestus 😴<br>Kontrolli internetiühendust ja proovi uuesti.</div>';
+      `<div class="errmsg">${T.errFail}</div>`;
   } finally {
     errSt.loading = false;
   }
@@ -1019,8 +1274,8 @@ async function errLoadNextMonth() {
   errSt.loaded++;
 }
 document.getElementById('errmore').addEventListener('click', function () {
-  this.textContent = 'Laen…';
-  errLoadNextMonth().catch(() => {}).finally(() => { this.textContent = 'Lae varasemaid jutte'; });
+  this.textContent = T.errLoading;
+  errLoadNextMonth().catch(() => {}).finally(() => { this.textContent = T.errmore; });
 });
 function errFmt(s) {
   if (!isFinite(s)) return '0:00';
@@ -1105,16 +1360,9 @@ document.querySelectorAll('#errspeed .chip').forEach(c => c.addEventListener('cl
 errUpdateSpeedChips();
 
 /* ================= routine ================= */
+/* emoji + options only; labels come from T.tasks[i] so they follow the language */
 const TASKS = [
-  ['🧸', 'Korista mänguasjad ära'],
-  ['🚽', 'Pissile ja potile'],
-  ['🛁', 'Vanni ja pesule', { cond: true }],
-  ['🦷', 'Pese hambad puhtaks'],
-  ['👕', 'Pidžaama selga'],
-  ['💧', 'Lonks vett'],
-  ['📖', 'Üks unejutt'],
-  ['🤗', 'Suur unekalli'],
-  ['🌙', 'Tuled kustu, silmad kinni'],
+  ['🧸'], ['🚽'], ['🛁', { cond: true }], ['🦷'], ['👕'], ['💧'], ['📖'], ['🤗'], ['🌙'],
 ];
 const todayStr = new Date().toISOString().slice(0, 10);
 
@@ -1123,7 +1371,7 @@ const KIDS_KEY = 'unemaa-kids', ACTIVE_KEY = 'unemaa-activekid';
 const KID_EMOJI = ['🦊', '🐰', '🐻', '🐯', '🦁', '🐨', '🐼', '🦄', '🐶', '🐱', '🐸', '🐧'];
 function loadKids() {
   try { const v = JSON.parse(localStorage.getItem(KIDS_KEY)); if (Array.isArray(v) && v.length) return v; } catch (e) {}
-  return [{ id: 'k1', name: 'Mina', emoji: '🦊' }];
+  return [{ id: 'k1', name: T.kidDefault, emoji: '🦊' }];
 }
 let kids = loadKids();
 let activeKid = localStorage.getItem(ACTIVE_KEY) || kids[0].id;
@@ -1187,13 +1435,16 @@ function praise() {
     if (!hasTTS) return;
     try {
       speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance('Tubli töö! Kõik unesammud on tehtud. Head ööd!');
-      u.lang = 'et-EE'; u.rate = 0.9; u.pitch = 1.15;
-      if (etVoice) u.voice = etVoice;
+      const u = new SpeechSynthesisUtterance(T.praise);
+      u.lang = T.showsTTS; u.rate = 0.9; u.pitch = 1.15;
+      const lv = langVoice();
+      if (lv) u.voice = lv;
       speechSynthesis.speak(u);
     } catch (e) {}
   };
-  // pre-generated neural TTS in the chosen narrator's voice; device system voice as fallback
+  // English has no neural narration — speak it with the device voice
+  if (L === 'en') { fallback(); return; }
+  // Estonian: pre-generated neural TTS in the chosen narrator's voice; device voice as fallback
   try {
     const a = new Audio(`audio/${voice}/congrats.mp3`);
     a.preservesPitch = true; a.webkitPreservesPitch = true;
@@ -1215,12 +1466,13 @@ function loadDone() { done = dayDone(activeKid, todayStr); }
 function renderTasks() {
   tlist.innerHTML = '';
   const skips = daySkips(activeKid, todayStr);
-  TASKS.forEach(([e, l, opt], i) => {
+  TASKS.forEach(([e, opt], i) => {
+    const l = T.tasks[i];
     const skipped = skips.includes(i);
     const el = document.createElement('div');
     el.className = 'task' + (done.includes(i) ? ' done' : '') + (skipped ? ' skip' : '');
     let html = `<span class="te">${e}</span><span class="tl">${l}</span>`;
-    if (opt && opt.cond) html += `<button class="tskip">${skipped ? 'täna ikka' : 'täna ei'}</button>`;
+    if (opt && opt.cond) html += `<button class="tskip">${skipped ? T.skipYes : T.skipNo}</button>`;
     html += `<span class="tc">✓</span>`;
     el.innerHTML = html;
     el.addEventListener('click', ev => {
@@ -1264,7 +1516,7 @@ function renderStreak() {
   const s = streak(activeKid);
   const lbl = document.createElement('span');
   lbl.className = 'streaklbl';
-  lbl.textContent = s > 0 ? `🔥 ${s} ${s === 1 ? 'öö' : 'ööd'} järjest` : 'alusta uut seeriat';
+  lbl.textContent = s > 0 ? `${T.streakPre}${s} ${s === 1 ? T.streakUnit1 : T.streakUnitN}${T.streakPost}` : T.streakStart;
   streakrow.appendChild(lbl);
 }
 
@@ -1303,7 +1555,7 @@ function switchKid(id) {
 }
 
 function addKid() {
-  const name = (prompt('Lapse nimi?') || '').trim();
+  const name = (prompt(T.kidNamePrompt) || '').trim();
   if (!name) return;
   const used = kids.map(k => k.emoji);
   const emoji = KID_EMOJI.find(e => !used.includes(e)) || '⭐';
@@ -1313,10 +1565,10 @@ function addKid() {
 }
 
 function kidMenu(k) {
-  const v = prompt(`"${k.name}" — kirjuta uus nimi, või "kustuta" et laps eemaldada:`, k.name);
+  const v = prompt(T.kidMenu(k.name), k.name);
   if (v === null) return;
-  if (v.trim().toLowerCase() === 'kustuta') {
-    if (kids.length <= 1) { alert('Vähemalt üks laps peab alles jääma.'); return; }
+  if (v.trim().toLowerCase() === T.kidDeleteKw) {
+    if (kids.length <= 1) { alert(T.kidMin); return; }
     kids = kids.filter(x => x.id !== k.id); saveKids();
     if (activeKid === k.id) switchKid(kids[0].id); else renderKids();
   } else if (v.trim()) {
@@ -1365,7 +1617,37 @@ function resetTasks() {
 document.getElementById('resettasks').addEventListener('click', resetTasks);
 document.getElementById('creset').addEventListener('click', resetTasks);
 
-loadDone(); renderTasks(); renderKids(); updateMeter(false);
+/* ================= apply language ================= */
+function refreshSoundCards() {
+  document.querySelectorAll('.snd').forEach(c =>
+    c.querySelector('.st').textContent = c.classList.contains('playing') ? T.sndPlaying : T.sndTap);
+}
+function applyLang() {
+  T = STR[L];
+  document.documentElement.lang = L;
+  document.title = T.title;
+  document.getElementById('langtoggle').textContent = T.switchLabel;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n'); if (T[k] != null) el.innerHTML = T[k];
+  });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const k = el.getAttribute('data-i18n-title'); if (T[k] != null) el.title = T[k];
+  });
+  // English narration uses the device voice, so the Estonian narrator chips don't apply
+  document.querySelector('.voicerow').style.display = L === 'en' ? 'none' : '';
+  refreshSoundCards();
+  renderStoryList();
+  renderTasks(); updateMeter(false);
+  updateSpeakBtn();
+  if (reader.classList.contains('open')) showPage();
+}
+document.getElementById('langtoggle').addEventListener('click', () => {
+  L = L === 'et' ? 'en' : 'et';
+  localStorage.setItem('unemaa-lang', L);
+  applyLang();
+});
+
+loadDone(); renderKids(); applyLang();
 </script>
 </body>
 </html>
