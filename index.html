@@ -169,8 +169,10 @@ input[type=range]::-webkit-slider-thumb {
 }
 .vchip.on { color: var(--ink); background: linear-gradient(160deg, #ffe3a6, var(--moon-deep));
   border-color: transparent; box-shadow: var(--glow); }
+#storylist { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .storycard {
-  display: flex; align-items: center; gap: 16px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; text-align: center; gap: 10px;
+  padding: 16px 12px; margin-bottom: 0; cursor: pointer;
   transition: transform .2s ease, border-color .2s;
 }
 .storycard:active { transform: scale(.97); }
@@ -180,8 +182,8 @@ input[type=range]::-webkit-slider-thumb {
   background: linear-gradient(160deg, var(--ink-3), var(--ink-2));
   border: 1px solid var(--card-line);
 }
-.storycard h3 { font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 17px; }
-.storycard p { color: var(--muted); font-size: 13px; margin-top: 3px; }
+.storycard h3 { font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 16px; line-height: 1.2; }
+.storycard p { color: var(--muted); font-size: 12.5px; margin-top: 3px; }
 #reader {
   position: fixed; inset: 0; z-index: 20; display: none;
   flex-direction: column; background: linear-gradient(180deg, #0a0e23, #10103a);
@@ -320,7 +322,7 @@ input[type=range]::-webkit-slider-thumb {
       <p>aeg uniseks jääda…</p>
     </header>
     <!-- SOUNDS -->
-    <section class="screen active" id="s-sounds">
+    <section class="screen" id="s-sounds">
       <h2>Öised helid <small>vali üks ja lase sel ümiseda</small></h2>
       <div id="soundgrid">
         <div class="snd" data-snd="rain"><span class="big">🌧️</span><span class="nm">Vihm</span><span class="st">puuduta ja kuula</span></div>
@@ -357,10 +359,13 @@ input[type=range]::-webkit-slider-thumb {
       <div class="card" id="errplayer" style="display:none">
         <div id="errnow"></div>
         <div class="errctl">
-          <button id="errpp">⏸</button>
+          <button id="errback" title="10 sek tagasi">⏪︎</button>
+          <button id="errpp">⏸︎</button>
+          <button id="errfwd" title="10 sek edasi">⏩︎</button>
           <input type="range" id="errseek" min="0" max="1000" value="0">
           <span id="errtime">0:00</span>
         </div>
+        <div class="mixrow" style="margin-top:14px"><span class="lbl">🔉</span><input type="range" id="errvol" min="0" max="100" value="100"><span class="lbl">🔊</span></div>
         <div class="chips" id="errspeed">
           <button class="chip" data-r="0.5">0.5×</button>
           <button class="chip" data-r="0.75">0.75×</button>
@@ -374,7 +379,7 @@ input[type=range]::-webkit-slider-thumb {
     </section>
 
     <!-- ROUTINE -->
-    <section class="screen" id="s-routine">
+    <section class="screen active" id="s-routine">
       <h2>Unesammud <small>tee kõik ära, et kuu täis saaks</small></h2>
       <div id="kidbar"></div>
       <div id="moonmeter">
@@ -390,10 +395,10 @@ input[type=range]::-webkit-slider-thumb {
   </main>
 
   <nav>
-    <button class="on" data-scr="sounds"><span class="ico">🌧️</span>Helid</button>
+    <button class="on" data-scr="routine"><span class="ico">⭐</span>Sammud</button>
     <button data-scr="stories"><span class="ico">📖</span>Jutud</button>
     <button data-scr="err"><span class="ico">📻</span>Õhtujutt</button>
-    <button data-scr="routine"><span class="ico">⭐</span>Sammud</button>
+    <button data-scr="sounds"><span class="ico">🌧️</span>Helid</button>
   </nav>
 </div>
 
@@ -950,7 +955,8 @@ document.getElementById('rclose').addEventListener('click', () => { reader.class
 const ERR_API = 'https://services.err.ee/api/v2/vodContent/getContentPageData?contentId=';
 const ERR_SEED = 1610028683; // any Õhtujutt episode id — its page data carries the series archive
 const errSt = { months: [], loaded: 0, day: null, loading: false, audio: null, playingId: null,
-  rate: parseFloat(localStorage.getItem('unemaa-err-rate') || '1') };
+  rate: parseFloat(localStorage.getItem('unemaa-err-rate') || '1'),
+  vol: parseFloat(localStorage.getItem('unemaa-err-vol') || '1') };
 async function errFetch(id) {
   const r = await fetch(ERR_API + id);
   if (!r.ok) throw new Error('http ' + r.status);
@@ -1022,7 +1028,7 @@ function errFmt(s) {
 }
 function errUpdateUI() {
   const a = errSt.audio;
-  document.getElementById('errpp').textContent = (!a || a.paused) ? '▶' : '⏸';
+  document.getElementById('errpp').textContent = (!a || a.paused) ? '▶︎' : '⏸︎';
   document.querySelectorAll('.ep.playing .epp').forEach(e => e.textContent = (!a || a.paused) ? '▶' : '⏸');
   if (!a) return;
   document.getElementById('errtime').textContent = errFmt(a.currentTime) + ' / ' + errFmt(a.duration);
@@ -1045,6 +1051,7 @@ async function errPlay(ep, row) {
     const a = new Audio(src.startsWith('//') ? 'https:' + src : src);
     a.preservesPitch = true; a.webkitPreservesPitch = true;
     a.playbackRate = errSt.rate;
+    a.volume = errSt.vol;
     errSt.audio = a;
     Snd.stop(); quietTTS(); // one storyteller at a time
     document.getElementById('errplayer').style.display = 'block';
@@ -1062,6 +1069,24 @@ async function errPlay(ep, row) {
 document.getElementById('errpp').addEventListener('click', () => {
   const a = errSt.audio;
   if (a) { a.paused ? a.play() : a.pause(); errUpdateUI(); }
+});
+function errSeekBy(sec) {
+  const a = errSt.audio;
+  if (!a) return;
+  let t = a.currentTime + sec;
+  t = Math.max(0, t);
+  if (a.duration) t = Math.min(t, a.duration);
+  a.currentTime = t;
+  errUpdateUI();
+}
+document.getElementById('errback').addEventListener('click', () => errSeekBy(-10));
+document.getElementById('errfwd').addEventListener('click', () => errSeekBy(10));
+const errvol = document.getElementById('errvol');
+errvol.value = Math.round(errSt.vol * 100);
+errvol.addEventListener('input', e => {
+  errSt.vol = e.target.value / 100;
+  localStorage.setItem('unemaa-err-vol', errSt.vol);
+  if (errSt.audio) errSt.audio.volume = errSt.vol;
 });
 document.getElementById('errseek').addEventListener('input', e => {
   const a = errSt.audio;
