@@ -250,6 +250,16 @@ input[type=range]::-webkit-slider-thumb {
 .task.done .tl { text-decoration: line-through; text-decoration-color: var(--moon-deep); }
 .task.done .te { transform: scale(1.18) rotate(-8deg); }
 .task.done .tc { background: var(--moon); border-color: var(--moon); color: var(--ink); }
+.task .tskip {
+  font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 13px; white-space: nowrap;
+  padding: 6px 12px; border-radius: 14px; color: var(--muted);
+  background: transparent; border: 1px solid var(--card-line); cursor: pointer;
+}
+.task.skip { opacity: .5; cursor: default; }
+.task.skip .te { filter: grayscale(1); }
+.task.skip .tl { text-decoration: line-through; text-decoration-color: var(--muted); }
+.task.skip .tc { display: none; }
+.task.skip .tskip { color: var(--moon); border-color: rgba(255, 217, 138, .4); }
 #resettasks {
   display: block; width: 100%; margin-top: 14px; padding: 13px; border-radius: 16px;
   font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 15px;
@@ -1072,7 +1082,8 @@ errUpdateSpeedChips();
 /* ================= routine ================= */
 const TASKS = [
   ['🧸', 'Korista mänguasjad ära'],
-  ['🛁', 'Pesule ja potile'],
+  ['🚽', 'Pissile ja potile'],
+  ['🛁', 'Vanni ja pesule', { cond: true }],
   ['🦷', 'Pese hambad puhtaks'],
   ['👕', 'Pidžaama selga'],
   ['💧', 'Lonks vett'],
@@ -1111,7 +1122,15 @@ saveKids(); saveActive(); // persist defaults so the kid list is stable from the
 /* ----- per-kid / per-day storage ----- */
 const dayKey = (kid, ds) => `unemaa-${kid}-${ds}`;
 function dayDone(kid, ds) { try { return JSON.parse(localStorage.getItem(dayKey(kid, ds)) || '[]'); } catch (e) { return []; } }
-const dayComplete = (kid, ds) => dayDone(kid, ds).length >= TASKS.length;
+/* conditional steps the parent set aside for the night ("täna ei") — not required for a full moon */
+const skipKey = (kid, ds) => `unemaa-skip-${kid}-${ds}`;
+function daySkips(kid, ds) { try { return JSON.parse(localStorage.getItem(skipKey(kid, ds)) || '[]'); } catch (e) { return []; } }
+const LEGACY_FULL = 8; // routine length before the bath/potty split (2026-06); keeps old full moons earned
+function dayComplete(kid, ds) {
+  const skips = daySkips(kid, ds), done = dayDone(kid, ds);
+  if (done.filter(i => !skips.includes(i)).length >= TASKS.length - skips.length) return true;
+  return ds < todayStr && done.length >= LEGACY_FULL; // a night already earned can't lose its moon
+}
 const ymd = d => d.toISOString().slice(0, 10);
 function streak(kid) {
   let s = 0, d = new Date();
@@ -1170,11 +1189,17 @@ function loadDone() { done = dayDone(activeKid, todayStr); }
 
 function renderTasks() {
   tlist.innerHTML = '';
-  TASKS.forEach(([e, l], i) => {
+  const skips = daySkips(activeKid, todayStr);
+  TASKS.forEach(([e, l, opt], i) => {
+    const skipped = skips.includes(i);
     const el = document.createElement('div');
-    el.className = 'task' + (done.includes(i) ? ' done' : '');
-    el.innerHTML = `<span class="te">${e}</span><span class="tl">${l}</span><span class="tc">✓</span>`;
+    el.className = 'task' + (done.includes(i) ? ' done' : '') + (skipped ? ' skip' : '');
+    let html = `<span class="te">${e}</span><span class="tl">${l}</span>`;
+    if (opt && opt.cond) html += `<button class="tskip">${skipped ? 'täna ikka' : 'täna ei'}</button>`;
+    html += `<span class="tc">✓</span>`;
+    el.innerHTML = html;
     el.addEventListener('click', ev => {
+      if (skips.includes(i)) return; // a step set aside for tonight isn't checkable
       const idx = done.indexOf(i);
       if (idx > -1) { done.splice(idx, 1); }
       else { done.push(i); flyStars(ev.clientX, ev.clientY); chime(false); }
@@ -1182,8 +1207,24 @@ function renderTasks() {
       localStorage.setItem(dayKey(activeKid, todayStr), JSON.stringify(done));
       updateMeter(true);
     });
+    const sb = el.querySelector('.tskip');
+    if (sb) sb.addEventListener('click', ev => { ev.stopPropagation(); toggleSkip(i); });
     tlist.appendChild(el);
   });
+}
+
+function toggleSkip(i) {
+  const skips = daySkips(activeKid, todayStr);
+  const at = skips.indexOf(i);
+  if (at > -1) { skips.splice(at, 1); }
+  else {
+    skips.push(i);
+    const di = done.indexOf(i); // setting aside also clears any earlier check
+    if (di > -1) { done.splice(di, 1); localStorage.setItem(dayKey(activeKid, todayStr), JSON.stringify(done)); }
+  }
+  localStorage.setItem(skipKey(activeKid, todayStr), JSON.stringify(skips));
+  renderTasks();
+  updateMeter(true);
 }
 
 function renderStreak() {
@@ -1259,7 +1300,10 @@ function kidMenu(k) {
 }
 
 function updateMeter(doCelebrate) {
-  const pct = Math.round(done.length / TASKS.length * 100);
+  const skips = daySkips(activeKid, todayStr);
+  const reqTotal = TASKS.length - skips.length;
+  const doneReq = done.filter(i => !skips.includes(i)).length;
+  const pct = reqTotal ? Math.round(doneReq / reqTotal * 100) : 100;
   meterfill.style.width = pct + '%';
   meterpct.textContent = pct + '%';
   renderStreak();
@@ -1289,6 +1333,7 @@ function flyStars(x, y) {
 function resetTasks() {
   done = [];
   localStorage.setItem(dayKey(activeKid, todayStr), '[]');
+  localStorage.removeItem(skipKey(activeKid, todayStr));
   closeCele();
   renderTasks(); updateMeter(false);
 }
