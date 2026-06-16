@@ -195,12 +195,18 @@ input[type=range]::-webkit-slider-thumb {
   flex-direction: column; background: linear-gradient(180deg, #0a0e23, #10103a);
 }
 #reader.open { display: flex; }
-#reader .top { display: flex; justify-content: space-between; align-items: center;
+#reader .top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
   padding: calc(max(16px, env(safe-area-inset-top)) + 4px) 20px 0; }
+#reader .top > #rclose { justify-self: start; }
+#reader .top > #rspeak { justify-self: end; }
+#rdots { justify-self: center; }
 #reader .top button { background: var(--card); border: 1px solid var(--card-line); color: var(--text);
   border-radius: 14px; padding: 8px 16px; font-family: 'Fredoka'; font-size: 14px; cursor: pointer; }
-#rspeak.on { background: linear-gradient(160deg, #ffe3a6, var(--moon-deep)); color: var(--ink);
+#rspeak.on, #rauto.on { background: linear-gradient(160deg, #ffe3a6, var(--moon-deep)); color: var(--ink);
   border-color: transparent; box-shadow: var(--glow); }
+#reader .autorow { display: flex; justify-content: center; padding: 12px 20px 0; }
+#rauto { background: var(--card); border: 1px solid var(--card-line); color: var(--text);
+  border-radius: 14px; padding: 8px 18px; font-family: 'Fredoka'; font-size: 14px; cursor: pointer; }
 #rdots { display: flex; gap: 5px; }
 #rdots i { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-3); transition: background .3s; }
 #rdots i.done { background: var(--moon); }
@@ -324,7 +330,7 @@ input[type=range]::-webkit-slider-thumb {
 <div id="app">
   <main>
     <header>
-      <h1>Unemaa <span>🌙</span></h1>
+      <h1 data-i18n="brand_h1">Unemaa <span>🌙</span></h1>
       <p data-i18n="tagline">aeg uniseks jääda…</p>
       <button id="langtoggle" class="langtoggle">🌐 English</button>
     </header>
@@ -412,6 +418,7 @@ input[type=range]::-webkit-slider-thumb {
 <!-- story reader -->
 <div id="reader">
   <div class="top"><button id="rclose" data-i18n="rclose">← Tagasi</button><div id="rdots"></div><button id="rspeak">🔇 Loe ette</button></div>
+  <div class="autorow"><button id="rauto" data-i18n="autoplayLabel">⏭︎ Autoplay</button></div>
   <div class="voicerow">
     <button class="vchip" data-v="kylli">👩 Külli</button>
     <button class="vchip" data-v="peeter">👨 Peeter</button>
@@ -437,6 +444,7 @@ let L = localStorage.getItem('unemaa-lang') === 'en' ? 'en' : 'et';
 const STR = {
   et: {
     title: 'Unemaa · Head ööd',
+    brand_h1: 'Unemaa <span>🌙</span>',
     tagline: 'aeg uniseks jääda…',
     switchLabel: '🌐 English',
     h_sounds: 'Öised helid <small>vali üks ja lase sel ümiseda</small>',
@@ -460,6 +468,7 @@ const STR = {
     cele_p: 'Iga unesamm on tehtud.<br>Kuu on täis ja sinu üle uhke.<br><b>Head ööd, maga magusasti! 💤</b>',
     cstory: '📖 Loe unejuttu', csound: '🌧️ Pane unehelid', cclose: 'Sulge', creset: '↺ Alusta uuesti',
     speakOn: '🔊 Loeb ette', speakOff: '🔇 Loe ette',
+    autoplayLabel: '⏭︎ Automaatne',
     pageWord: 'lehekülge',
     hintEnd: 'lõpp 🌙 puuduta, et sulgeda', hintTurn: 'puuduta ekraani, et lehte keerata',
     praise: 'Tubli töö! Kõik unesammud on tehtud. Head ööd!',
@@ -472,10 +481,12 @@ const STR = {
     kidMin: 'Vähemalt üks laps peab alles jääma.',
     kidMenu: k => `"${k}" — kirjuta uus nimi, või "kustuta" et laps eemaldada:`,
     kidDeleteKw: 'kustuta',
+    kidAdd: 'Lisa laps', kidEdit: 'muuda nime',
     showsTTS: 'et-EE',
   },
   en: {
-    title: 'Unemaa · Good night',
+    title: 'Sleepland · Good night',
+    brand_h1: 'Sleepland <span>🌙</span>',
     tagline: 'time to get sleepy…',
     switchLabel: '🌐 Eesti',
     h_sounds: 'Night sounds <small>pick one and let it hum</small>',
@@ -499,6 +510,7 @@ const STR = {
     cele_p: 'Every bedtime step is finished.<br>The moon is full and proud of you.<br><b>Good night, sleep sweetly! 💤</b>',
     cstory: '📖 Read a story', csound: '🌧️ Play sleep sounds', cclose: 'Close', creset: '↺ Start again',
     speakOn: '🔊 Reading aloud', speakOff: '🔇 Read aloud',
+    autoplayLabel: '⏭︎ Autoplay',
     pageWord: 'pages',
     hintEnd: 'the end 🌙 tap to close', hintTurn: 'tap the screen to turn the page',
     praise: 'Great job! All your bedtime steps are done. Good night!',
@@ -511,6 +523,7 @@ const STR = {
     kidMin: 'At least one child must stay.',
     kidMenu: k => `"${k}" — type a new name, or "delete" to remove the child:`,
     kidDeleteKw: 'delete',
+    kidAdd: 'Add child', kidEdit: 'edit name',
     showsTTS: 'en-US',
   },
 };
@@ -1112,9 +1125,11 @@ let curStory = 0, curPage = 0;
 
 /* read-aloud (Web Speech API) */
 const rspeak = document.getElementById('rspeak');
+const rauto = document.getElementById('rauto');
 const hasTTS = 'speechSynthesis' in window;
 let speakOn = localStorage.getItem('unemaa-speak') === '1';
-let etVoice = null, enVoice = null, narrator = null;
+let autoOn = localStorage.getItem('unemaa-auto') === '1';
+let etVoice = null, enVoice = null, narrator = null, autoTimer = null, curUtter = null;
 function pickVoice() {
   const vs = speechSynthesis.getVoices();
   etVoice = vs.find(v => v.lang.toLowerCase().startsWith('et')) || null;
@@ -1126,12 +1141,25 @@ function updateSpeakBtn() {
   rspeak.classList.toggle('on', speakOn);
   rspeak.textContent = speakOn ? T.speakOn : T.speakOff;
 }
+function updateAutoBtn() { rauto.classList.toggle('on', autoOn); }
+// when narration for a page finishes, autoplay turns to the next page after a short beat
+function onNarrationEnd() {
+  if (!autoOn || !reader.classList.contains('open')) return;
+  if (curPage >= stLen(curStory) - 1) return; // stay on the last page
+  const at = curPage;
+  clearTimeout(autoTimer);
+  autoTimer = setTimeout(() => {
+    if (autoOn && reader.classList.contains('open') && curPage === at) { curPage++; showPage(); }
+  }, 500);
+}
 function speakPageTTS() {
   if (!hasTTS) return;
   const u = new SpeechSynthesisUtterance(stText(curStory, curPage));
   u.lang = T.showsTTS; u.rate = 0.85; u.pitch = 1.05;
   const lv = langVoice();
   if (lv) u.voice = lv;
+  curUtter = u;
+  u.onend = () => { if (u === curUtter) onNarrationEnd(); }; // ignore end fired by a cancel
   speechSynthesis.speak(u);
 }
 let voice = localStorage.getItem('unemaa-voice') || 'kylli';
@@ -1165,12 +1193,15 @@ function speakPage() {
       tryPlay(exts.slice(1));
     };
     a.onerror = fail;
+    a.onended = onNarrationEnd;
     a.play().catch(fail);
   };
   tryPlay(['.mp3', '.wav']);
 }
 function quietTTS() {
-  if (narrator) { narrator.onerror = null; narrator.pause(); narrator = null; }
+  clearTimeout(autoTimer);
+  if (narrator) { narrator.onerror = null; narrator.onended = null; narrator.pause(); narrator = null; }
+  curUtter = null; // any pending utterance's onend is now stale
   if (hasTTS) speechSynthesis.cancel();
 }
 rspeak.addEventListener('click', () => {
@@ -1178,6 +1209,16 @@ rspeak.addEventListener('click', () => {
   localStorage.setItem('unemaa-speak', speakOn ? '1' : '0');
   updateSpeakBtn();
   if (speakOn) speakPage(); else quietTTS();
+});
+rauto.addEventListener('click', () => {
+  autoOn = !autoOn;
+  localStorage.setItem('unemaa-auto', autoOn ? '1' : '0');
+  updateAutoBtn();
+  // autoplay rides on the narration ending, so turning it on also starts read-aloud
+  if (autoOn && !speakOn) {
+    speakOn = true; localStorage.setItem('unemaa-speak', '1');
+    updateSpeakBtn(); speakPage();
+  }
 });
 
 function openStory(i) {
@@ -1526,7 +1567,7 @@ function renderKids() {
     const c = document.createElement('div');
     const active = k.id === activeKid;
     c.className = 'kidchip' + (active ? ' on' : '');
-    c.innerHTML = `<span class="ke">${k.emoji}</span>${k.name}` + (active ? '<span class="kedit" title="muuda nime">✎</span>' : '');
+    c.innerHTML = `<span class="ke">${k.emoji}</span>${k.name}` + (active ? `<span class="kedit" title="${T.kidEdit}">✎</span>` : '');
     // tap a different kid to switch; tap the selected kid (or long-press any) to rename/remove
     let lp, lpFired;
     c.addEventListener('click', () => {
@@ -1543,7 +1584,7 @@ function renderKids() {
   });
   const add = document.createElement('div');
   add.className = 'kidchip kidadd';
-  add.innerHTML = '<span class="ke">＋</span>Lisa laps';
+  add.innerHTML = `<span class="ke">＋</span>${T.kidAdd}`;
   add.addEventListener('click', addKid);
   kidbar.appendChild(add);
 }
@@ -1637,8 +1678,14 @@ function applyLang() {
   document.querySelector('.voicerow').style.display = L === 'en' ? 'none' : '';
   refreshSoundCards();
   renderStoryList();
+  // the auto-created default child follows the language (a renamed child is left alone)
+  if (kids.length === 1 && kids[0].id === 'k1' &&
+      (kids[0].name === STR.et.kidDefault || kids[0].name === STR.en.kidDefault)) {
+    kids[0].name = T.kidDefault; saveKids();
+  }
+  renderKids();
   renderTasks(); updateMeter(false);
-  updateSpeakBtn();
+  updateSpeakBtn(); updateAutoBtn();
   if (reader.classList.contains('open')) showPage();
 }
 document.getElementById('langtoggle').addEventListener('click', () => {
@@ -1647,7 +1694,7 @@ document.getElementById('langtoggle').addEventListener('click', () => {
   applyLang();
 });
 
-loadDone(); renderKids(); applyLang();
+loadDone(); applyLang(); // applyLang renders kids, tasks, stories and the meter
 </script>
 </body>
 </html>
