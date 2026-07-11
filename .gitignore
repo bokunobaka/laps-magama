@@ -1,6 +1,1 @@
-# local voice experiments — not deployed
-audio-test/
-test-voices.html
-
-# Claude Code statusline runtime log (regrows forever)
 .claude/statusline.log
