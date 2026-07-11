@@ -244,6 +244,8 @@ input[type=range]::-webkit-slider-thumb {
   cursor: pointer; box-shadow: var(--glow); flex-shrink: 0; }
 .errctl span { color: var(--muted); font-size: 12px; min-width: 76px; text-align: right; }
 .errmsg { text-align: center; color: var(--muted); padding: 30px 10px; font-size: 14px; }
+#errlimitrow .lbl { color: var(--muted); font-size: 13px; }
+#errlimitval { min-width: 18px; text-align: right; }
 #errmore { display: block; width: 100%; margin-top: 14px; padding: 13px; border-radius: 16px;
   font-family: 'Fredoka', sans-serif; font-weight: 500; font-size: 15px;
   color: var(--muted); background: transparent; border: 1px solid var(--card-line); cursor: pointer; }
@@ -394,6 +396,11 @@ input[type=range]::-webkit-slider-thumb {
           <button class="chip" data-r="0.9">0.9×</button>
           <button class="chip" data-r="1">1×</button>
         </div>
+        <div class="mixrow" id="errlimitrow" style="margin-top:14px">
+          <span class="lbl" data-i18n="errAuto">Jutte järjest:</span>
+          <input type="range" id="errlimit" min="1" max="10" value="1">
+          <span class="lbl" id="errlimitval">1</span>
+        </div>
       </div>
       <div id="errlist"><div class="errmsg" data-i18n="errLoading">Laen jutte…</div></div>
       <button id="errmore" style="display:none" data-i18n="errmore">Lae varasemaid jutte</button>
@@ -471,6 +478,7 @@ const STR = {
     errback_t: '10 sek tagasi', errfwd_t: '10 sek edasi',
     errLoading: 'Laen jutte…',
     errmore: 'Lae varasemaid jutte',
+    errAuto: 'Jutte järjest:',
     errsrc: 'Allikas: <a href="https://lasteekraan.err.ee" target="_blank" rel="noopener">ERR Lasteekraan</a> · Vikerraadio',
     errFail: 'Juttude laadimine ebaõnnestus 😴<br>Kontrolli internetiühendust ja proovi uuesti.',
     cele_h: 'Kõik tehtud, supertäht!',
@@ -513,6 +521,7 @@ const STR = {
     errback_t: 'back 10 sec', errfwd_t: 'forward 10 sec',
     errLoading: 'Loading tales…',
     errmore: 'Load older tales',
+    errAuto: 'Tales in a row:',
     errsrc: 'Source: <a href="https://lasteekraan.err.ee" target="_blank" rel="noopener">ERR Lasteekraan</a> · Vikerraadio (in Estonian)',
     errFail: 'Could not load the tales 😴<br>Check your internet connection and try again.',
     cele_h: 'All done, superstar!',
@@ -1260,6 +1269,8 @@ document.getElementById('rclose').addEventListener('click', () => { reader.class
 const ERR_API = 'https://services.err.ee/api/v2/vodContent/getContentPageData?contentId=';
 const ERR_SEED = 1610028683; // any Õhtujutt episode id — its page data carries the series archive
 const errSt = { months: [], loaded: 0, day: null, loading: false, audio: null, playingId: null,
+  eps: [], played: 0, // flat list of loaded episodes (newest first) + autoplay counter
+  limit: Math.min(10, Math.max(1, parseInt(localStorage.getItem('unemaa-err-limit') || '1', 10) || 1)),
   rate: parseFloat(localStorage.getItem('unemaa-err-rate') || '1'),
   vol: parseFloat(localStorage.getItem('unemaa-err-vol') || '1') };
 async function errFetch(id) {
@@ -1288,6 +1299,7 @@ function errAddMonth(m) {
       `<span class="ept">${ep.heading.replace(/^Õhtujutt( lastele)?[.,]?\s*/i, '')}</span><span class="epp">▶</span>`;
     row.addEventListener('click', () => errPlay(ep, row));
     if (ep.id === errSt.playingId) { row.classList.add('playing'); row.querySelector('.epp').textContent = '⏸'; }
+    errSt.eps.push({ ep, row });
     list.appendChild(row);
   }
 }
@@ -1301,6 +1313,7 @@ async function errInit() {
     const data = await errFetch(ERR_SEED);
     errSt.months = errMonthsFrom(data);
     errSt.loaded = 0;
+    errSt.eps = [];
     document.getElementById('errlist').innerHTML = '';
     await errLoadNextMonth();
     document.getElementById('errmore').style.display = 'block';
@@ -1339,13 +1352,14 @@ function errUpdateUI() {
   document.getElementById('errtime').textContent = errFmt(a.currentTime) + ' / ' + errFmt(a.duration);
   if (a.duration) document.getElementById('errseek').value = Math.round(a.currentTime / a.duration * 1000);
 }
-async function errPlay(ep, row) {
+async function errPlay(ep, row, auto) {
   if (errSt.playingId === ep.id && errSt.audio) {
     errSt.audio.paused ? errSt.audio.play() : errSt.audio.pause();
     errUpdateUI();
     return;
   }
   if (errSt.audio) { errSt.audio.pause(); errSt.audio = null; }
+  errSt.played = auto ? errSt.played + 1 : 1;
   errSt.playingId = ep.id;
   document.querySelectorAll('.ep.playing').forEach(r => { r.classList.remove('playing'); r.querySelector('.epp').textContent = '▶'; });
   row.classList.add('playing');
@@ -1362,7 +1376,7 @@ async function errPlay(ep, row) {
     document.getElementById('errplayer').style.display = 'block';
     document.getElementById('errnow').textContent = ep.heading;
     a.ontimeupdate = errUpdateUI;
-    a.onended = errUpdateUI;
+    a.onended = () => { errUpdateUI(); errAutoNext(); };
     a.onplay = errUpdateUI;
     a.onpause = errUpdateUI;
     await a.play();
@@ -1408,6 +1422,25 @@ document.querySelectorAll('#errspeed .chip').forEach(c => c.addEventListener('cl
   errUpdateSpeedChips();
 }));
 errUpdateSpeedChips();
+/* when a tale ends, continue with the next day's one (a row up — list is newest first),
+   until the "tales in a row" limit is reached */
+function errAutoNext() {
+  if (!errSt.audio || !errSt.audio.ended) return;
+  if (errSt.played >= errSt.limit) return;
+  const i = errSt.eps.findIndex(x => x.ep.id === errSt.playingId);
+  if (i <= 0) return; // not found, or already at the newest tale
+  const next = errSt.eps[i - 1];
+  next.row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  errPlay(next.ep, next.row, true);
+}
+const errlimit = document.getElementById('errlimit');
+errlimit.value = errSt.limit;
+document.getElementById('errlimitval').textContent = errSt.limit;
+errlimit.addEventListener('input', e => {
+  errSt.limit = parseInt(e.target.value, 10);
+  localStorage.setItem('unemaa-err-limit', e.target.value);
+  document.getElementById('errlimitval').textContent = e.target.value;
+});
 
 /* ================= routine ================= */
 /* emoji + options only; labels come from T.tasks[i] so they follow the language */
